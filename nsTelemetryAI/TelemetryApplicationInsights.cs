@@ -1,5 +1,5 @@
 ﻿/* ==============================
-** Copyright 2015, 2018 nishy software
+** Copyright 2015, 2018, 2020 nishy software
 **
 **      First Author : nishy software
 **		Create : 2015/12/07
@@ -19,6 +19,7 @@ namespace NishySoftware.Telemetry.ApplicationInsights
     using System.Globalization;
     using System.IO;
     using System.Linq;
+    using System.Net;
     using System.Management;
     using System.Net.NetworkInformation;
     using System.Text;
@@ -26,6 +27,7 @@ namespace NishySoftware.Telemetry.ApplicationInsights
     using System.Threading.Tasks;
     using System.Security.Principal;
     using System.Reflection;
+    using System.Runtime.InteropServices;
 
     internal class SdkVersionUtils
     {
@@ -34,6 +36,27 @@ namespace NishySoftware.Telemetry.ApplicationInsights
             return typeof(Microsoft.ApplicationInsights.Channel.ITelemetry).Assembly.GetCustomAttributes(false).OfType<AssemblyFileVersionAttribute>().First<AssemblyFileVersionAttribute>().Version;
         }
     }
+
+    //
+    // Summary:
+    //     This enumeration is used by ExceptionTelemetry to identify if and where exception
+    //     was handled.
+    internal enum ExceptionHandledAt
+    {
+        //
+        // Summary:
+        //     Exception was not handled. Application crashed.
+        Unhandled = 0,
+        //
+        // Summary:
+        //     Exception was handled in user code.
+        UserCode = 1,
+        //
+        // Summary:
+        //     Exception was handled by some platform handlers.
+        Platform = 2
+    }
+
 
     class TelemetryFactoryApplicationInsights
     {
@@ -106,33 +129,78 @@ namespace NishySoftware.Telemetry.ApplicationInsights
                     {
                         UpdateNetworkType();
                     }
-                    if (changed.HasFlag(Telemetry.TelemetryDataFlag.DeviceName))
-                    {
-                        if (_telemetryDataFlags.HasFlag(Telemetry.TelemetryDataFlag.DeviceName))
+
+                    UpdateTelemetryDataProperty(changed, Telemetry.TelemetryDataFlag.DeviceName, nameof(Telemetry.TelemetryDataFlag.DeviceName),
+                        () =>
                         {
                             DeviceContextReader instance = DeviceContextReader.Instance;
                             var oemName = instance.GetOemName();
                             var model = DeviceTelemetryInitializer.AdjustDeviceModel(instance.GetDeviceModel(), oemName);
+                            return model;
+                        });
 
-                            _defaultGlobalProperties["DeviceName"] = model;
-                        }
-                        else
-                        {
-                            _defaultGlobalProperties.Remove("DeviceName");
-                        }
-                    }
-                    if (changed.HasFlag(Telemetry.TelemetryDataFlag.DeviceManufacturer))
-                    {
-                        if (_telemetryDataFlags.HasFlag(Telemetry.TelemetryDataFlag.DeviceManufacturer))
+                    UpdateTelemetryDataProperty(changed, Telemetry.TelemetryDataFlag.DeviceManufacturer, nameof(Telemetry.TelemetryDataFlag.DeviceManufacturer),
+                        () =>
                         {
                             DeviceContextReader instance = DeviceContextReader.Instance;
-                            var oemName = instance.GetOemName();
-                            _defaultGlobalProperties["DeviceManufacturer"] = oemName;
-                        }
-                        else
+                            return instance.GetOemName();
+                        });
+
+                    UpdateTelemetryDataProperty(changed, Telemetry.TelemetryDataFlag.ScreenResolution, nameof(Telemetry.TelemetryDataFlag.ScreenResolution),
+                        () =>
                         {
-                            _defaultGlobalProperties.Remove("DeviceManufacturer");
-                        }
+                            DeviceContextReader instance = DeviceContextReader.Instance;
+                            return instance.GetScreenResolution();
+                        });
+
+                    UpdateTelemetryDataProperty(changed, Telemetry.TelemetryDataFlag.Language, nameof(Telemetry.TelemetryDataFlag.Language),
+                        () =>
+                        {
+                            DeviceContextReader instance = DeviceContextReader.Instance;
+                            return instance.GetHostSystemLocale();
+                        });
+
+                    UpdateTelemetryDataProperty(changed, Telemetry.TelemetryDataFlag.ExeName, nameof(Telemetry.TelemetryDataFlag.ExeName),
+                        () =>
+                        {
+                            var asm = System.Reflection.Assembly.GetEntryAssembly();
+                            var exeName = Path.GetFileName(asm.Location);
+                            return exeName;
+                        });
+
+                    UpdateTelemetryDataProperty(changed, Telemetry.TelemetryDataFlag.HostName, nameof(Telemetry.TelemetryDataFlag.HostName),
+                        () =>
+                        {
+                            var hostName = Dns.GetHostName();
+                            if (string.IsNullOrWhiteSpace(hostName))
+                            {
+                                hostName = Environment.MachineName;
+                            }
+                            return hostName;
+                        });
+
+                    UpdateTelemetryDataProperty(changed, Telemetry.TelemetryDataFlag.UserName, nameof(Telemetry.TelemetryDataFlag.UserName),
+                        () =>
+                        {
+                            return Environment.UserName;
+                        });
+                }
+            }
+        }
+
+        static void UpdateTelemetryDataProperty(Telemetry.TelemetryDataFlag changed, Telemetry.TelemetryDataFlag flag, string name, Func<string> getValue)
+        {
+            if (changed.HasFlag(flag))
+            {
+                lock (_defaultGlobalSyncObj)
+                {
+                    if (_telemetryDataFlags.HasFlag(flag))
+                    {
+                        _defaultGlobalProperties[name] = getValue();
+                    }
+                    else
+                    {
+                        _defaultGlobalProperties.Remove(name);
                     }
                 }
             }
@@ -180,6 +248,19 @@ namespace NishySoftware.Telemetry.ApplicationInsights
             }
         }
 
+        public static bool? EnableDeveloperMode(bool enable)
+        {
+            bool? old = null;
+            var config = Microsoft.ApplicationInsights.Extensibility.TelemetryConfiguration.Active;
+            if (config != null
+                && config.TelemetryChannel != null)
+            {
+                old = config.TelemetryChannel.DeveloperMode;
+                config.TelemetryChannel.DeveloperMode = false;
+            }
+            return old;
+        }
+
         #endregion public methods
 
         #region event handlers
@@ -209,19 +290,19 @@ namespace NishySoftware.Telemetry.ApplicationInsights
             {
                 if (_telemetryDataFlags.HasFlag(Telemetry.TelemetryDataFlag.NetworkType))
                 {
-                    _defaultGlobalProperties["NetworkType"] = networkType;
+                    _defaultGlobalProperties[nameof(Telemetry.TelemetryDataFlag.NetworkType)] = networkType;
                 }
                 else
                 {
-                    _defaultGlobalProperties.Remove("NetworkType");
+                    _defaultGlobalProperties.Remove(nameof(Telemetry.TelemetryDataFlag.NetworkType));
                 }
                 if (_telemetryDataFlags.HasFlag(Telemetry.TelemetryDataFlag.NetworkSpeed))
                 {
-                    _defaultGlobalMetrics["NetworkSpeed"] = networkSpeed;
+                    _defaultGlobalMetrics[nameof(Telemetry.TelemetryDataFlag.NetworkSpeed)] = networkSpeed;
                 }
                 else
                 {
-                    _defaultGlobalMetrics.Remove("NetworkSpeed");
+                    _defaultGlobalMetrics.Remove(nameof(Telemetry.TelemetryDataFlag.NetworkSpeed));
                 }
             }
         }
@@ -428,11 +509,10 @@ namespace NishySoftware.Telemetry.ApplicationInsights
         {
             var exp = new ExceptionTelemetry(exception)
             {
-                HandledAt = ExceptionHandledAt.UserCode,
                 SeverityLevel = level,
             };
 
-            this.TrackException(exp, properties, metrics);
+            this.TrackException(exp, ExceptionHandledAt.UserCode, properties, metrics);
         }
 
         public void Flush()
@@ -496,7 +576,7 @@ namespace NishySoftware.Telemetry.ApplicationInsights
             }
         }
 
-        void TrackException(ExceptionTelemetry telemetry, IDictionary<string, string> properties = null, IDictionary<string, double> metrics = null)
+        void TrackException(ExceptionTelemetry telemetry, NishySoftware.Telemetry.ApplicationInsights.ExceptionHandledAt at, IDictionary<string, string> properties = null, IDictionary<string, double> metrics = null)
         {
             TelemetryClient telemetryClient = LazyInitializer.EnsureInitialized<TelemetryClient>(ref this._telemetryClient, () => new TelemetryClient(this._configuration));
             try
@@ -509,7 +589,13 @@ namespace NishySoftware.Telemetry.ApplicationInsights
                         UpdateTelemetryData(telemetry.Properties, telemetry.Metrics, this._defaultGlobalExceptionProperties, this._defaultGlobalExceptionMetrics);
                     }
                     UpdateTelemetryData(telemetry.Properties, telemetry.Metrics, this._defaultProperties, this._defaultMetrics);
-                } catch { }
+                }
+                catch { }
+                try
+                {
+                    telemetry.Properties[nameof(NishySoftware.Telemetry.ApplicationInsights.ExceptionHandledAt)] = at.ToString();
+                }
+                catch { }
                 try
                 {
                     var currentProcess = System.Diagnostics.Process.GetCurrentProcess();
@@ -523,19 +609,23 @@ namespace NishySoftware.Telemetry.ApplicationInsights
                     telemetry.Metrics["MemoryPeakWorkingSet"] = currentProcess.PeakWorkingSet64;
                     telemetry.Metrics["MemoryPeakVirtualSize"] = currentProcess.PeakVirtualMemorySize64;
                     telemetry.Metrics["ThreadCount"] = currentProcess.Threads.Count;
-                } catch { }
+                }
+                catch { }
                 try
                 {
                     telemetry.Metrics["MemoryManagedSize"] = System.GC.GetTotalMemory(false);
-                } catch { }
+                }
+                catch { }
                 try
                 {
                     telemetry.Properties["IsAggregateException"] = (telemetry.Exception.GetType() == typeof(AggregateException)).ToString();
-                } catch { }
+                }
+                catch { }
                 try
                 {
                     UpdateTelemetryData(telemetry.Properties, telemetry.Metrics, properties, metrics);
-                } catch { }
+                }
+                catch { }
                 telemetryClient.TrackException(telemetry);
             }
             catch (ObjectDisposedException)
@@ -843,9 +933,6 @@ namespace NishySoftware.Telemetry.ApplicationInsights
                 var model = AdjustDeviceModel(instance.GetDeviceModel(), oemName);
                 telemetry.Context.Device.OemName = oemName;
                 telemetry.Context.Device.Model = model;
-                long networkSpeed = 0;
-                telemetry.Context.Device.NetworkType = instance.GetNetworkType(ref networkSpeed);
-                telemetry.Context.Device.Language = instance.GetHostSystemLocale();
                 telemetry.Context.Device.OperatingSystem = instance.GetOperatingSystem();
             }
         }
@@ -876,6 +963,7 @@ namespace NishySoftware.Telemetry.ApplicationInsights
         private string _deviceId = "";
         private string _deviceManufacturer;
         private string _deviceName;
+        private string _screenResolution;
         private string _networkType;
         private long _networkSpeed;
         private string _operatingSystem;
@@ -985,6 +1073,45 @@ namespace NishySoftware.Telemetry.ApplicationInsights
                 return this._deviceName;
             }
             return this._deviceName = this.RunWmiQuery("Win32_ComputerSystem", "Model", string.Empty);
+        }
+
+        [DllImport("user32.dll")]
+        static extern int GetSystemMetrics(SystemMetric smIndex);
+
+        /// <summary>
+        /// Flags used with the Windows API (User32.dll):GetSystemMetrics(SystemMetric smIndex)
+        ///  
+        /// This Enum and declaration signature was written by Gabriel T. Sharp
+        /// ai_productions@verizon.net or osirisgothra@hotmail.com
+        /// Obtained on pinvoke.net, please contribute your code to support the wiki!
+        /// </summary>
+        public enum SystemMetric : int
+        {
+            /// <summary>
+            /// The width of the screen of the primary display monitor, in pixels. This is the same value obtained by calling 
+            /// GetDeviceCaps as follows: GetDeviceCaps( hdcPrimaryMonitor, HORZRES).
+            /// </summary>
+            SM_CXSCREEN = 0,
+            /// <summary>
+            /// The height of the screen of the primary display monitor, in pixels. This is the same value obtained by calling 
+            /// GetDeviceCaps as follows: GetDeviceCaps( hdcPrimaryMonitor, VERTRES).
+            /// </summary>
+            SM_CYSCREEN = 1,
+        }
+
+        /// <summary>
+        /// Gets the ScreenResolution.
+        /// </summary>
+        /// <returns>The discovered ScreenResolution.</returns>
+        public string GetScreenResolution(bool force = false)
+        {
+            if (force || string.IsNullOrEmpty(this._screenResolution))
+            {
+                var width = GetSystemMetrics(SystemMetric.SM_CXSCREEN);
+                var height = GetSystemMetrics(SystemMetric.SM_CYSCREEN);
+                this._screenResolution = string.Format("{0:D}x{1:D}", width, height);
+            }
+            return this._screenResolution;
         }
 
         /// <summary>

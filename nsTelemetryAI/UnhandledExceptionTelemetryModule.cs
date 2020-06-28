@@ -1,5 +1,5 @@
 ﻿/* ==============================
-** Copyright 2015 nishy software
+** Copyright 2015, 2020 nishy software
 **
 **      First Author : nishy software
 **		Create : 2015/12/07
@@ -100,9 +100,13 @@ namespace NishySoftware.Telemetry.ApplicationInsights
 
             var exp = new ExceptionTelemetry(unhandledExceptionEventArgs.ExceptionObject as Exception)
             {
-                HandledAt = ExceptionHandledAt.Unhandled,
                 SeverityLevel = SeverityLevel.Critical,
             };
+            try
+            {
+                exp.Properties[nameof(NishySoftware.Telemetry.ApplicationInsights.ExceptionHandledAt)] = NishySoftware.Telemetry.ApplicationInsights.ExceptionHandledAt.Unhandled.ToString();
+            }
+            catch { }
 
             var properties = exp.Properties;
             var metrics = exp.Metrics;
@@ -129,15 +133,18 @@ namespace NishySoftware.Telemetry.ApplicationInsights
                 exp.Metrics["MemoryPeakWorkingSet"] = currentProcess.PeakWorkingSet64;
                 exp.Metrics["MemoryPeakVirtualSize"] = currentProcess.PeakVirtualMemorySize64;
                 exp.Metrics["ThreadCount"] = currentProcess.Threads.Count;
-            } catch { }
+            }
+            catch { }
             try
             {
                 exp.Metrics["MemoryManagedSize"] = System.GC.GetTotalMemory(false);
-            } catch { }
+            }
+            catch { }
             try
             {
                 exp.Properties["IsAggregateException"] = (exp.Exception.GetType() == typeof(AggregateException)).ToString();
-            } catch { }
+            }
+            catch { }
 
             telemetryClient.TrackException(exp);
             telemetryClient.Flush();

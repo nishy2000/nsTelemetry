@@ -1,5 +1,5 @@
 ﻿/* ==============================
-** Copyright 2015 nishy software
+** Copyright 2015, 2020 nishy software
 **
 **      First Author : nishy software
 **		Create : 2015/12/07
@@ -39,7 +39,31 @@ namespace NishySoftware.Telemetry.ApplicationInsights
             /// <summary>
             /// Manufacture をGlobalPropertiesに追加します
             /// </summary>
-            DeviceManufacturer = 8
+            DeviceManufacturer = 8,
+            /// <summary>
+            /// ScreenResolution をGlobalPropertiesに追加します
+            /// </summary>
+            ScreenResolution = 16,
+            /// <summary>
+            /// Language をGlobalPropertiesに追加します
+            /// </summary>
+            Language = 32,
+            /// <summary>
+            /// ExeName をGlobalPropertiesに追加します
+            /// </summary>
+            ExeName = 64,
+            /// <summary>
+            /// HostName をGlobalPropertiesに追加します
+            /// </summary>
+            HostName = 128,
+            /// <summary>
+            /// UserName をGlobalPropertiesに追加します
+            /// </summary>
+            UserName = 256,
+
+            // All / Default
+            All = 0x00ffffff,
+            Default = NetworkType | NetworkSpeed | DeviceName | DeviceManufacturer | ScreenResolution | Language | ExeName,
         };
 
         /// <summary>
@@ -64,6 +88,19 @@ namespace NishySoftware.Telemetry.ApplicationInsights
             {
                 TelemetryFactoryApplicationInsights.TelemetryDataFlags = value;
             }
+        }
+
+        /// <summary>
+        /// 強制的にDeveloperModeを設定・解除する
+        /// 通常はDebuggerがアッタッチされていたら、DeveloperModeモードに設定される。
+        /// DeveloperModeが有効な場合は、TrackXXX関数を呼び出したときに常に同期送信が行われる。
+        /// 同期送信では、TrackXXX関数を呼び出したとき待ちが発生するため、アプリの動作が遅くなる。
+        /// アプリの動作が遅くならないようにするためには、DeveloperModeを解除するとよい。
+        /// <returns>old value</returns>
+        /// </summary>
+        public static bool? EnableDeveloperMode(bool enable)
+        {
+            return TelemetryFactoryApplicationInsights.EnableDeveloperMode(enable);
         }
     }
 }
