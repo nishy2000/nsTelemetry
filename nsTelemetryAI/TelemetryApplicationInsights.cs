@@ -322,9 +322,24 @@ namespace NishySoftware.Telemetry.ApplicationInsights
             var configXml = ReadConfigurationXml();
             if (!string.IsNullOrWhiteSpace(configXml))
             {
+                // Remove <!-- --!>
+                var commentStartKey = "<!--";
+                var commentEndKey = "-->";
+                int commentStart;
+                while ((commentStart = configXml.IndexOf(commentStartKey)) >= 0)
+                {
+                    var commentEnd = configXml.IndexOf(commentEndKey, commentStart + commentStartKey.Length);
+                    if (commentEnd >= 0)
+                    {
+                        configXml = configXml.Remove(commentStart, commentEnd + commentEndKey.Length - commentStart);
+                    }
+                }
+
+                // find InstrumentationDevKey elements
                 var startKey = "<InstrumentationDevKey>";
+                var endKey = "</InstrumentationDevKey>";
                 var start = configXml.IndexOf(startKey);
-                var end = configXml.IndexOf("</InstrumentationDevKey>");
+                var end = configXml.IndexOf(endKey);
                 if (start >= 0 && end >= 0)
                 {
                     start += startKey.Length;

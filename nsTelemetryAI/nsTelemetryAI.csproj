@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net45</TargetFrameworks>
     <OutputType>Library</OutputType>
+    <TargetFrameworks>net45</TargetFrameworks>
     <AssemblyName>nsTelemetryAI</AssemblyName>
     <AssemblyTitle>Telemetry library for ApplicationInsights</AssemblyTitle>
     <AssemblyVersion>2.0.0.6280</AssemblyVersion>
