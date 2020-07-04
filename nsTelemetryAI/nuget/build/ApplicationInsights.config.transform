@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ApplicationInsights
+  xmlns="http://schemas.microsoft.com/ApplicationInsights/2013/Settings"
+  xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
+
+  <InstrumentationKey xdt:Transform="InsertIfMissing">Place your Key of ApplicationInsights</InstrumentationKey>
+  <InstrumentationDevKey xdt:Transform="InsertIfMissing">Place key of ApplicationInsights for development</InstrumentationDevKey>
+
+  <TelemetryModules xdt:Transform="InsertIfMissing">
+    <Add xdt:Transform="InsertIfMissing" xdt:Locator="Match(Type)" Type="NishySoftware.Telemetry.ApplicationInsights.DeveloperModeWithDebuggerAttachedTelemetryModule, nsTelemetryAI" />
+    <Add xdt:Transform="InsertIfMissing" xdt:Locator="Match(Type)" Type="NishySoftware.Telemetry.ApplicationInsights.UnhandledExceptionTelemetryModule, nsTelemetryAI" />
+    <Add xdt:Transform="InsertIfMissing" xdt:Locator="Match(Type)" Type="NishySoftware.Telemetry.ApplicationInsights.UnobservedExceptionTelemetryModule, nsTelemetryAI" />
+  </TelemetryModules>
+
+  <TelemetryChannel xdt:Transform="InsertIfMissing" />
+  <TelemetryChannel xdt:Transform="Remove" />
+  <TelemetryProcessors xdt:Transform="InsertIfMissing"/>
+  <TelemetryProcessors xdt:Transform="Remove"/>
+  <TelemetrySinks xdt:Transform="InsertIfMissing">
+  </TelemetrySinks>
+
+  <TelemetrySinks xdt:Transform="InsertIfMissing">
+    <Add Name="default" xdt:Transform="InsertIfMissing">
+    </Add>
+  </TelemetrySinks>
+
+  <TelemetrySinks>
+    <Add Name="default" xdt:Transform="InsertIfMissing">
+      <TelemetryChannel xdt:Transform="InsertIfMissing" />
+      <TelemetryChannel xdt:Transform="Remove" />
+      <TelemetryChannel xdt:Transform="Insert" Type="Microsoft.ApplicationInsights.WindowsServer.TelemetryChannel.ServerTelemetryChannel, Microsoft.AI.ServerTelemetryChannel" />
+    </Add>
+  </TelemetrySinks>
+</ApplicationInsights>

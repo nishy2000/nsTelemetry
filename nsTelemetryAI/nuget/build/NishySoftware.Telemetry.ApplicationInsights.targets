@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+    <VSToolsPath Condition="!Exists($(VSToolsPath))">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v19.0</VSToolsPath>
+    <VSToolsPath Condition="!Exists($(VSToolsPath))">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v18.0</VSToolsPath>
+    <VSToolsPath Condition="!Exists($(VSToolsPath))">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v17.0</VSToolsPath>
+    <VSToolsPath Condition="!Exists($(VSToolsPath))">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v16.0</VSToolsPath>
+    <VSToolsPath Condition="!Exists($(VSToolsPath))">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v15.0</VSToolsPath>
+    <VSToolsPath Condition="!Exists($(VSToolsPath))">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v14.0</VSToolsPath>
+    <VSToolsPath Condition="!Exists($(VSToolsPath))">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v13.0</VSToolsPath>
+    <VSToolsPath Condition="!Exists($(VSToolsPath))">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v12.0</VSToolsPath>
+    <VSToolsPath Condition="!Exists($(VSToolsPath))">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v11.0</VSToolsPath>
+    <VSToolsPath Condition="!Exists($(VSToolsPath))">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0</VSToolsPath>
+    <MSWebPubTaskPath>$(VSToolsPath)\Web\Microsoft.Web.Publishing.Tasks.dll</MSWebPubTaskPath>
+  </PropertyGroup>
+
+  <UsingTask TaskName="TransformXml" AssemblyFile="$(MSWebPubTaskPath)" />
+  <UsingTask TaskName="GetFileSize" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+    <ParameterGroup>
+      <FileName Required="true" />
+      <FileSize ParameterType="System.Int64" Output="true" />
+    </ParameterGroup>
+    <Task>
+      <Using Namespace="System.IO" />
+      <Code Type="Fragment" Language="cs">
+        <![CDATA[
+FileInfo fi = new FileInfo(FileName);
+FileSize = fi.Length;
+]]>
+      </Code>
+    </Task>
+  </UsingTask>
+
+  <Target Name="NishySoftwareTelemetryAppInsightsCopyConfigFileToOutputDirectory" AfterTargets="CopyFilesToOutputDirectory" Condition="Exists('ApplicationInsights.config')" >
+    <PropertyGroup>
+      <SourceConfigFileSize>0</SourceConfigFileSize>
+      <OutputConfigFileSize>0</OutputConfigFileSize>
+    </PropertyGroup>
+    <GetFileSize Condition="Exists('ApplicationInsights.config')" FileName="ApplicationInsights.config">
+      <Output TaskParameter="FileSize" PropertyName="SourceConfigFileSize" />
+    </GetFileSize>
+    <GetFileSize Condition="Exists('$(OutputPath)/ApplicationInsights.config')" FileName="$(OutputPath)/ApplicationInsights.config">
+      <Output TaskParameter="FileSize" PropertyName="OutputConfigFileSize" />
+    </GetFileSize>
+
+    <!--Currently we cannot set the config's "Copy to Output Directory" property to "PreserveNewest.
+          Workaround is to use this targets file to manually copy into output path."-->
+
+    <Message Condition="'$(SourceConfigFileSize)' != '0' And '$(SourceConfigFileSize)' != '$(OutputConfigFileSize)'"
+             Text="NishySoftware.Telemetry.ApplicationInsights: Copying ApplicationInsights.config to $(OutputPath)"
+             Importance="normal" />
+    <Copy Condition="'$(SourceConfigFileSize)' != '0' And '$(SourceConfigFileSize)' != '$(OutputConfigFileSize)'"
+          SourceFiles="ApplicationInsights.config" DestinationFolder="$(OutputPath)" ContinueOnError="true" />
+  </Target>
+
+  <PropertyGroup>
+    <NishySoftwareTelemetryAppInsightsTargetName>ApplicationInsights.config</NishySoftwareTelemetryAppInsightsTargetName>
+    <NishySoftwareTelemetryAppInsightsTargetFile>$(MSBuildProjectDirectory)\$(NishySoftwareTelemetryAppInsightsTargetName)</NishySoftwareTelemetryAppInsightsTargetFile>
+    <NishySoftwareTelemetryAppInsightsTransformFile>$(MSBuildThisFileDirectory)\$(NishySoftwareTelemetryAppInsightsTargetName).transform</NishySoftwareTelemetryAppInsightsTransformFile>
+    <NishySoftwareTelemetryAppInsightsTemplateFile>$(MSBuildThisFileDirectory)\$(NishySoftwareTelemetryAppInsightsTargetName)</NishySoftwareTelemetryAppInsightsTemplateFile>
+  </PropertyGroup>
+
+  <Target Name="NishySoftwareTelemetryAppInsightsCreateConfigFile" BeforeTargets="NishySoftwareTelemetryAppInsightsUpdateConfigFile"
+          Condition="!Exists($(NishySoftwareTelemetryAppInsightsTargetFile))">
+    <Message Text="NishySoftware.Telemetry.ApplicationInsights: Create ApplicationInsights.config file ($(NishySoftwareTelemetryAppInsightsTargetFile))" Importance="high" />
+    <Copy SourceFiles="$(NishySoftwareTelemetryAppInsightsTemplateFile)" DestinationFiles="$(NishySoftwareTelemetryAppInsightsTargetFile)" ContinueOnError="true" />
+  </Target>
+
+  <Target Name="NishySoftwareTelemetryAppInsightsCanNotUpdateConfigFile"
+          Condition="!Exists($(MSWebPubTaskPath))"
+          BeforeTargets="BeforeBuild">
+
+    <Warning Condition="!Exists($(MSWebPubTaskPath))"
+             Text="NishySoftware.Telemetry.ApplicationInsights: Need Visual Studio workload (ASP.NET and web development) or Visual Studio component  (ASP.NET and web development tools) to validate and update ApplicationInsights.config file"/>
+  </Target>
+  
+  <Target Name="NishySoftwareTelemetryAppInsightsUpdateConfigFile"
+          Condition="Exists($(MSWebPubTaskPath))"
+          BeforeTargets="BeforeBuild">
+    <PropertyGroup>
+      <TransformXmlFilesIntermediateLocation>$(BaseIntermediateOutputPath)</TransformXmlFilesIntermediateLocation>
+    </PropertyGroup>
+
+    <PropertyGroup>
+      <TransformTargetFile>$(NishySoftwareTelemetryAppInsightsTargetFile)</TransformTargetFile>
+      <TransformOutputFolder>$(TransformXmlFilesIntermediateLocation)\transformed</TransformOutputFolder>
+      <TransformOutputFile>$(TransformOutputFolder)\$(NishySoftwareTelemetryAppInsightsTargetName)</TransformOutputFile>
+      <TransformTargetFileSize>0</TransformTargetFileSize>
+      <TransformOutputFileSize>0</TransformOutputFileSize>
+    </PropertyGroup>
+
+    <MakeDir Condition="!Exists($(TransformOutputFolder))" Directories="$(TransformOutputFolder)" />
+    <Delete Condition="Exists($(TransformOutputFile))" Files="$(TransformOutputFile)" ContinueOnError="true"/>
+    <TransformXml Source="$(TransformTargetFile)" Transform="$(NishySoftwareTelemetryAppInsightsTransformFile)" Destination="$(TransformOutputFile)" />
+    <GetFileSize Condition="Exists($(TransformTargetFile))" FileName="$(TransformTargetFile)">
+      <Output TaskParameter="FileSize" PropertyName="TransformTargetFileSize" />
+    </GetFileSize>
+    <GetFileSize Condition="Exists($(TransformOutputFile))" FileName="$(TransformOutputFile)">
+      <Output TaskParameter="FileSize" PropertyName="TransformOutputFileSize" />
+    </GetFileSize>
+    <Message Condition="'$(TransformOutputFileSize)' != '0' And '$(TransformTargetFileSize)' != '$(TransformOutputFileSize)'"
+             Text="NishySoftware.Telemetry.ApplicationInsights: Update ApplicationInsights.config file ($(NishySoftwareTelemetryAppInsightsTargetFile))"
+             Importance="high" />
+    <Copy Condition="'$(TransformOutputFileSize)' != '0' And '$(TransformTargetFileSize)' != '$(TransformOutputFileSize)'"
+          SourceFiles="$(TransformOutputFile)" DestinationFiles="$(TransformTargetFile)" ContinueOnError="true" />
+  </Target>
+
+</Project>

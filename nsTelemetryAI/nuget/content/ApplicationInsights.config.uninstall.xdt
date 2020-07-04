@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ApplicationInsights xmlns="http://schemas.microsoft.com/ApplicationInsights/2013/Settings" xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
+
+  <TelemetryModules>
+    <Add xdt:Transform="Remove" xdt:Locator="Match(Type)" Type="NishySoftware.Telemetry.ApplicationInsights.DeveloperModeWithDebuggerAttachedTelemetryModule, nsTelemetryAI" />
+    <Add xdt:Transform="Remove" xdt:Locator="Match(Type)" Type="NishySoftware.Telemetry.ApplicationInsights.UnhandledExceptionTelemetryModule, nsTelemetryAI" />
+    <Add xdt:Transform="Remove" xdt:Locator="Match(Type)" Type="NishySoftware.Telemetry.ApplicationInsights.UnobservedExceptionTelemetryModule, nsTelemetryAI" />
+  </TelemetryModules>
+  <TelemetryModules xdt:Transform="Remove" xdt:Locator="Condition(count(*)=0)"/>
+
+  <TelemetrySinks>
+    <Add Name="default">
+      <TelemetryChannel xdt:Transform="Remove" xdt:Locator="Match(Type)" Type="Microsoft.ApplicationInsights.WindowsServer.TelemetryChannel.ServerTelemetryChannel, Microsoft.AI.ServerTelemetryChannel" />
+    </Add>
+  </TelemetrySinks>
+
+  <TelemetrySinks>
+    <Add Name="default" xdt:Transform="Remove" xdt:Locator="Condition(count(*)=0)">
+    </Add>
+  </TelemetrySinks>
+
+  <TelemetrySinks xdt:Transform="Remove" xdt:Locator="Condition(count(*)=0)"/>
+</ApplicationInsights>

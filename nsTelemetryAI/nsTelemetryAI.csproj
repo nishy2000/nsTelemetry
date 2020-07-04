@@ -43,4 +43,15 @@
     <Reference Include="System.Management" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!--Nuget Transforms (install.xdt, uninstall.xdt, config.transform): "nupkg\content\<framework>\*.*-->
+    <Content Include="nuget\content\ApplicationInsights.config.transform" PackagePath="content" />
+    <Content Include="nuget\content\ApplicationInsights.config.install.xdt" PackagePath="content" />
+    <Content Include="nuget\content\ApplicationInsights.config.uninstall.xdt" PackagePath="content" />
+    <!--Nuget build (.targets): "nupkg\build\<framework>\*.*-->
+    <Content Include="nuget\build\ApplicationInsights.config" PackagePath="build" />
+    <Content Include="nuget\build\ApplicationInsights.config.transform" PackagePath="build" />
+    <Content Include="nuget\build\NishySoftware.Telemetry.ApplicationInsights.targets" PackagePath="build" />
+  </ItemGroup>
+
 </Project>
