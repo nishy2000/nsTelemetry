@@ -3,12 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30523.141
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nsTelemetryAI", "nsTelemetryAI\nsTelemetryAI.csproj", "{9982E4F1-AA48-4438-8F67-607B916E41E2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "nsTelemetryAI", "nsTelemetryAI\nsTelemetryAI.csproj", "{9982E4F1-AA48-4438-8F67-607B916E41E2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D672EBED-19B2-4CAB-8E2F-E1F70F33B7B0}"
 	ProjectSection(SolutionItems) = preProject
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
+		global.json = global.json
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{C19DF905-008C-4302-ABFD-4CE632384615}"
@@ -17,7 +18,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{C19DF905-0
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nsTelemetryAI.Sample", "nsTelemetryAI.Sample\nsTelemetryAI.Sample.csproj", "{EE24DEE0-CC7D-4068-9C1F-E267334F1130}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "nsTelemetryAI.Sample", "nsTelemetryAI.Sample\nsTelemetryAI.Sample.csproj", "{EE24DEE0-CC7D-4068-9C1F-E267334F1130}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

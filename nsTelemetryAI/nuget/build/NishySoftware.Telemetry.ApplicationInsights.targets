@@ -72,7 +72,6 @@ FileSize = fi.Length;
   <Target Name="NishySoftwareTelemetryAppInsightsCanNotUpdateConfigFile"
           Condition="!Exists($(MSWebPubTaskPath))"
           BeforeTargets="BeforeBuild">
-
     <Warning Condition="!Exists($(MSWebPubTaskPath))"
              Text="NishySoftware.Telemetry.ApplicationInsights: Need Visual Studio workload (ASP.NET and web development) or Visual Studio component  (ASP.NET and web development tools) to validate and update ApplicationInsights.config file"/>
   </Target>
@@ -81,7 +80,7 @@ FileSize = fi.Length;
           Condition="Exists($(MSWebPubTaskPath))"
           BeforeTargets="BeforeBuild">
     <PropertyGroup>
-      <TransformXmlFilesIntermediateLocation>$(BaseIntermediateOutputPath)</TransformXmlFilesIntermediateLocation>
+      <TransformXmlFilesIntermediateLocation>$(IntermediateOutputPath)</TransformXmlFilesIntermediateLocation>
     </PropertyGroup>
 
     <PropertyGroup>
