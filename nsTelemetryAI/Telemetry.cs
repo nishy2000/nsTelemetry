@@ -102,5 +102,25 @@ namespace NishySoftware.Telemetry.ApplicationInsights
         {
             return TelemetryFactoryApplicationInsights.EnableDeveloperMode(enable);
         }
+
+        /// <summary>
+        /// グローバルにTelemetryが有効化されているか確認する静的関数
+        /// 無効化されている場合は、TrackXXXX()関数を呼び出しても、テレメトリー送信されません
+        /// <returns>current value</returns>
+        /// </summary>
+        public static bool IsEnabled()
+        {
+            return TelemetryFactoryApplicationInsights.IsEnabled();
+        }
+
+        /// <summary>
+        /// グローバルにTelemetryを有効化・無効化する静的関数
+        /// 無効化されている場合は、TrackXXXX()関数を呼び出しても、テレメトリー送信されません
+        /// <returns>old value</returns>
+        /// </summary>
+        public static bool Enable(bool enable)
+        {
+            return TelemetryFactoryApplicationInsights.Enable(enable);
+        }
     }
 }

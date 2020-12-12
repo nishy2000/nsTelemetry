@@ -58,6 +58,20 @@ namespace NishySoftware.Telemetry.ApplicationInsights
     }
 
 
+    internal class TelemetryGlobalParams
+    {
+        internal TelemetryGlobalParams()
+        {
+        }
+
+        internal readonly object _syncObj = new object();
+        internal volatile bool _globalEnable = true;
+        internal readonly Dictionary<string, string> _defaultGlobalProperties = new Dictionary<string, string>();
+        internal readonly Dictionary<string, double> _defaultGlobalMetrics = new Dictionary<string, double>();
+        internal readonly IDictionary<string, string> _defaultGlobalExceptionProperties = new Dictionary<string, string>();
+        internal readonly IDictionary<string, double> _defaultGlobalExceptionMetrics = new Dictionary<string, double>();
+    };
+
     class TelemetryFactoryApplicationInsights
     {
         #region Constructors / Destructor
@@ -87,11 +101,7 @@ namespace NishySoftware.Telemetry.ApplicationInsights
         #endregion Constructors / Destructor
 
         #region Fields
-        static readonly object _defaultGlobalSyncObj = new object();
-        static readonly Dictionary<string, string> _defaultGlobalProperties = new Dictionary<string, string>();
-        static readonly Dictionary<string, double> _defaultGlobalMetrics = new Dictionary<string, double>();
-        static readonly IDictionary<string, string> _defaultGlobalExceptionProperties = new Dictionary<string, string>();
-        static readonly IDictionary<string, double> _defaultGlobalExceptionMetrics = new Dictionary<string, double>();
+        static readonly TelemetryGlobalParams _globalParams = new TelemetryGlobalParams();
         #endregion Fields
 
         #region Properties
@@ -192,15 +202,15 @@ namespace NishySoftware.Telemetry.ApplicationInsights
         {
             if (changed.HasFlag(flag))
             {
-                lock (_defaultGlobalSyncObj)
+                lock (_globalParams._syncObj)
                 {
                     if (_telemetryDataFlags.HasFlag(flag))
                     {
-                        _defaultGlobalProperties[name] = getValue();
+                        _globalParams._defaultGlobalProperties[name] = getValue();
                     }
                     else
                     {
-                        _defaultGlobalProperties.Remove(name);
+                        _globalParams._defaultGlobalProperties.Remove(name);
                     }
                 }
             }
@@ -213,20 +223,18 @@ namespace NishySoftware.Telemetry.ApplicationInsights
 
         public static NishySoftware.Telemetry.ITelemetry Create()
         {
-            return new TelemetryApplicationInsights(_defaultGlobalSyncObj,
-                _defaultGlobalProperties, _defaultGlobalMetrics,
-                _defaultGlobalExceptionProperties, _defaultGlobalExceptionMetrics);
+            return new TelemetryApplicationInsights(_globalParams);
         }
 
         public static void GetGlobalParameters(ref IDictionary<string, string> properties, ref IDictionary<string, double> metrics)
         {
-            lock (_defaultGlobalSyncObj)
+            lock (_globalParams._syncObj)
             {
-                foreach (var item in _defaultGlobalProperties)
+                foreach (var item in _globalParams._defaultGlobalProperties)
                 {
                     properties[item.Key] = item.Value;
                 }
-                foreach (var item in _defaultGlobalMetrics)
+                foreach (var item in _globalParams._defaultGlobalMetrics)
                 {
                     metrics[item.Key] = item.Value;
                 }
@@ -235,13 +243,13 @@ namespace NishySoftware.Telemetry.ApplicationInsights
 
         public static void GetGlobalExceptionParameters(ref IDictionary<string, string> properties, ref IDictionary<string, double> metrics)
         {
-            lock (_defaultGlobalSyncObj)
+            lock (_globalParams._syncObj)
             {
-                foreach (var item in _defaultGlobalExceptionProperties)
+                foreach (var item in _globalParams._defaultGlobalExceptionProperties)
                 {
                     properties[item.Key] = item.Value;
                 }
-                foreach (var item in _defaultGlobalExceptionMetrics)
+                foreach (var item in _globalParams._defaultGlobalExceptionMetrics)
                 {
                     metrics[item.Key] = item.Value;
                 }
@@ -259,6 +267,22 @@ namespace NishySoftware.Telemetry.ApplicationInsights
                 config.TelemetryChannel.DeveloperMode = false;
             }
             return old;
+        }
+
+        public static bool IsEnabled()
+        {
+            return _globalParams._globalEnable;
+        }
+
+        public static bool Enable(bool enable)
+        {
+            bool oldValue = true;
+            lock (_globalParams._syncObj)
+            {
+                oldValue = _globalParams._globalEnable;
+                _globalParams._globalEnable = enable;
+            }
+            return oldValue;
         }
 
         #endregion public methods
@@ -286,23 +310,23 @@ namespace NishySoftware.Telemetry.ApplicationInsights
             {
                 networkType = instance.GetNetworkType(ref networkSpeed, true);
             }
-            lock (_defaultGlobalSyncObj)
+            lock (_globalParams._syncObj)
             {
                 if (_telemetryDataFlags.HasFlag(Telemetry.TelemetryDataFlag.NetworkType))
                 {
-                    _defaultGlobalProperties[nameof(Telemetry.TelemetryDataFlag.NetworkType)] = networkType;
+                    _globalParams._defaultGlobalProperties[nameof(Telemetry.TelemetryDataFlag.NetworkType)] = networkType;
                 }
                 else
                 {
-                    _defaultGlobalProperties.Remove(nameof(Telemetry.TelemetryDataFlag.NetworkType));
+                    _globalParams._defaultGlobalProperties.Remove(nameof(Telemetry.TelemetryDataFlag.NetworkType));
                 }
                 if (_telemetryDataFlags.HasFlag(Telemetry.TelemetryDataFlag.NetworkSpeed))
                 {
-                    _defaultGlobalMetrics[nameof(Telemetry.TelemetryDataFlag.NetworkSpeed)] = networkSpeed;
+                    _globalParams._defaultGlobalMetrics[nameof(Telemetry.TelemetryDataFlag.NetworkSpeed)] = networkSpeed;
                 }
                 else
                 {
-                    _defaultGlobalMetrics.Remove(nameof(Telemetry.TelemetryDataFlag.NetworkSpeed));
+                    _globalParams._defaultGlobalMetrics.Remove(nameof(Telemetry.TelemetryDataFlag.NetworkSpeed));
                 }
             }
         }
@@ -356,24 +380,16 @@ namespace NishySoftware.Telemetry.ApplicationInsights
     sealed class TelemetryApplicationInsights : NishySoftware.Telemetry.ITelemetry
     {
         #region Constructors / Destructor
-        public TelemetryApplicationInsights(object defaultGlobalSyncObj, IDictionary<string, string> defaultGlobalProperties, IDictionary<string, double> defaultGlobalMetrics, IDictionary<string, string> defaultGlobalExceptionProperties, IDictionary<string, double> defaultGlobalExceptionMetrics, TelemetryConfiguration configuration = null)
+        public TelemetryApplicationInsights(TelemetryGlobalParams globalParams, TelemetryConfiguration configuration = null)
         {
-            this._defaultGlobalSyncObj = defaultGlobalSyncObj;
-            this._defaultGlobalProperties = defaultGlobalProperties;
-            this._defaultGlobalMetrics = defaultGlobalMetrics;
-            this._defaultGlobalExceptionProperties = defaultGlobalExceptionProperties;
-            this._defaultGlobalExceptionMetrics = defaultGlobalExceptionMetrics;
+            this._globalParams = globalParams;
             this._configuration = configuration ?? TelemetryConfiguration.Active;
         }
         #endregion Constructors / Destructor
 
         #region Fields
         readonly TelemetryConfiguration _configuration;
-        readonly object _defaultGlobalSyncObj;
-        readonly IDictionary<string, string> _defaultGlobalProperties;
-        readonly IDictionary<string, double> _defaultGlobalMetrics;
-        readonly IDictionary<string, string> _defaultGlobalExceptionProperties;
-        readonly IDictionary<string, double> _defaultGlobalExceptionMetrics;
+        readonly TelemetryGlobalParams _globalParams;
         readonly Dictionary<string, string> _defaultProperties = new Dictionary<string, string>();
         readonly Dictionary<string, double> _defaultMetrics = new Dictionary<string, double>();
         TelemetryClient _telemetryClient;
@@ -381,15 +397,15 @@ namespace NishySoftware.Telemetry.ApplicationInsights
 
         #region ITelemetry interface
 
-        public object GlobalSyncObject { get { return this._defaultGlobalSyncObj; } }
+        public object GlobalSyncObject { get { return this._globalParams._syncObj; } }
 
-        public IDictionary<string, string> GlobalProperties { get { return this._defaultGlobalProperties; } }
+        public IDictionary<string, string> GlobalProperties { get { return this._globalParams._defaultGlobalProperties; } }
 
-        public IDictionary<string, double> GlobalMetrics { get { return this._defaultGlobalMetrics; } }
+        public IDictionary<string, double> GlobalMetrics { get { return this._globalParams._defaultGlobalMetrics; } }
 
-        public IDictionary<string, string> GlobalExceptionProperties { get { return this._defaultGlobalExceptionProperties; } }
+        public IDictionary<string, string> GlobalExceptionProperties { get { return this._globalParams._defaultGlobalExceptionProperties; } }
 
-        public IDictionary<string, double> GlobalExceptionMetrics { get { return this._defaultGlobalExceptionMetrics; } }
+        public IDictionary<string, double> GlobalExceptionMetrics { get { return this._globalParams._defaultGlobalExceptionMetrics; } }
 
         public IDictionary<string, string> Properties { get { return this._defaultProperties; } }
 
@@ -532,6 +548,8 @@ namespace NishySoftware.Telemetry.ApplicationInsights
 
         public void Flush()
         {
+            if (!this._globalParams._globalEnable) return;
+
             TelemetryClient telemetryClient = LazyInitializer.EnsureInitialized<TelemetryClient>(ref this._telemetryClient, () => new TelemetryClient(this._configuration));
             try
             {
@@ -547,12 +565,14 @@ namespace NishySoftware.Telemetry.ApplicationInsights
 
         void TrackEvent(EventTelemetry telemetry, TriggerType triggerType, IDictionary<string, string> properties = null, IDictionary<string, double> metrics = null)
         {
+            if (!this._globalParams._globalEnable) return;
+
             TelemetryClient telemetryClient = LazyInitializer.EnsureInitialized<TelemetryClient>(ref this._telemetryClient, () => new TelemetryClient(this._configuration));
             try
             {
-                lock (this._defaultGlobalSyncObj)
+                lock (this._globalParams._syncObj)
                 {
-                    UpdateTelemetryData(telemetry.Properties, telemetry.Metrics, this._defaultGlobalProperties, this._defaultGlobalMetrics);
+                    UpdateTelemetryData(telemetry.Properties, telemetry.Metrics, this._globalParams._defaultGlobalProperties, this._globalParams._defaultGlobalMetrics);
                 }
                 UpdateTelemetryData(telemetry.Properties, telemetry.Metrics, this._defaultProperties, this._defaultMetrics);
                 UpdateTelemetryData(telemetry.Properties, telemetry.Metrics, properties, metrics);
@@ -570,6 +590,8 @@ namespace NishySoftware.Telemetry.ApplicationInsights
 
         void TrackPageView(PageViewTelemetry telemetry, IDictionary<string, string> properties = null, IDictionary<string, double> metrics = null)
         {
+            if (!this._globalParams._globalEnable) return;
+
             TelemetryClient telemetryClient = LazyInitializer.EnsureInitialized<TelemetryClient>(ref this._telemetryClient, () => new TelemetryClient(this._configuration));
             try
             {
@@ -577,9 +599,9 @@ namespace NishySoftware.Telemetry.ApplicationInsights
                 {
                     telemetry.Name = "application:" + telemetry.Name;
                 }
-                lock (this._defaultGlobalSyncObj)
+                lock (this._globalParams._syncObj)
                 {
-                    UpdateTelemetryData(telemetry.Properties, telemetry.Metrics, this._defaultGlobalProperties, this._defaultGlobalMetrics);
+                    UpdateTelemetryData(telemetry.Properties, telemetry.Metrics, this._globalParams._defaultGlobalProperties, this._globalParams._defaultGlobalMetrics);
                 }
                 UpdateTelemetryData(telemetry.Properties, telemetry.Metrics, this._defaultProperties, this._defaultMetrics);
                 UpdateTelemetryData(telemetry.Properties, telemetry.Metrics, properties, metrics);
@@ -593,15 +615,17 @@ namespace NishySoftware.Telemetry.ApplicationInsights
 
         void TrackException(ExceptionTelemetry telemetry, NishySoftware.Telemetry.ApplicationInsights.ExceptionHandledAt at, IDictionary<string, string> properties = null, IDictionary<string, double> metrics = null)
         {
+            if (!this._globalParams._globalEnable) return;
+
             TelemetryClient telemetryClient = LazyInitializer.EnsureInitialized<TelemetryClient>(ref this._telemetryClient, () => new TelemetryClient(this._configuration));
             try
             {
                 try
                 {
-                    lock (this._defaultGlobalSyncObj)
+                    lock (this._globalParams._syncObj)
                     {
-                        UpdateTelemetryData(telemetry.Properties, telemetry.Metrics, this._defaultGlobalProperties, this._defaultGlobalMetrics);
-                        UpdateTelemetryData(telemetry.Properties, telemetry.Metrics, this._defaultGlobalExceptionProperties, this._defaultGlobalExceptionMetrics);
+                        UpdateTelemetryData(telemetry.Properties, telemetry.Metrics, this._globalParams._defaultGlobalProperties, this._globalParams._defaultGlobalMetrics);
+                        UpdateTelemetryData(telemetry.Properties, telemetry.Metrics, this._globalParams._defaultGlobalExceptionProperties, this._globalParams._defaultGlobalExceptionMetrics);
                     }
                     UpdateTelemetryData(telemetry.Properties, telemetry.Metrics, this._defaultProperties, this._defaultMetrics);
                 }
