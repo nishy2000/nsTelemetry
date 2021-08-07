@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net45;netstandard2.0</TargetFrameworks>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <AssemblyName>nsTelemetryAI.Sample</AssemblyName>
     <AssemblyTitle>nsTelemetryAI.Sample</AssemblyTitle>
     <AssemblyVersion>2.0.0.6280</AssemblyVersion>
@@ -15,7 +15,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Update="ApplicationInsights.config">
+    <Compile Include="..\nsTelemetryAI.Sample\Program.cs" Link="Program.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\nsTelemetryAI.Sample\ApplicationInsights.config" Link="ApplicationInsights.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -20,6 +20,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{C19DF905-0
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "nsTelemetryAI.Sample", "nsTelemetryAI.Sample\nsTelemetryAI.Sample.csproj", "{EE24DEE0-CC7D-4068-9C1F-E267334F1130}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nsTelemetryAI.Sample.netcore31", "nsTelemetryAI.Sample.netcore31\nsTelemetryAI.Sample.netcore31.csproj", "{E6EB314D-B537-43FD-957A-659DCFB66832}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -34,6 +36,10 @@ Global
 		{EE24DEE0-CC7D-4068-9C1F-E267334F1130}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EE24DEE0-CC7D-4068-9C1F-E267334F1130}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EE24DEE0-CC7D-4068-9C1F-E267334F1130}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E6EB314D-B537-43FD-957A-659DCFB66832}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6EB314D-B537-43FD-957A-659DCFB66832}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6EB314D-B537-43FD-957A-659DCFB66832}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6EB314D-B537-43FD-957A-659DCFB66832}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

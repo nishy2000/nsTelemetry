@@ -1,5 +1,5 @@
 ﻿/* ==============================
-** Copyright 2015, 2018, 2020 nishy software
+** Copyright 2015, 2018, 2020, 2021 nishy software
 **
 **      First Author : nishy software
 **		Create : 2015/12/07
@@ -25,6 +25,7 @@ namespace NishySoftware.Telemetry.ApplicationInsights
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
+    using System.Security.Cryptography;
     using System.Security.Principal;
     using System.Reflection;
     using System.Runtime.InteropServices;
@@ -72,7 +73,7 @@ namespace NishySoftware.Telemetry.ApplicationInsights
         internal readonly IDictionary<string, double> _defaultGlobalExceptionMetrics = new Dictionary<string, double>();
     };
 
-    class TelemetryFactoryApplicationInsights
+    class TelemetryFactoryApplicationInsights : PlatformBase
     {
         #region Constructors / Destructor
         static TelemetryFactoryApplicationInsights()
@@ -156,12 +157,15 @@ namespace NishySoftware.Telemetry.ApplicationInsights
                             return instance.GetOemName();
                         });
 
-                    UpdateTelemetryDataProperty(changed, Telemetry.TelemetryDataFlag.ScreenResolution, nameof(Telemetry.TelemetryDataFlag.ScreenResolution),
-                        () =>
-                        {
-                            DeviceContextReader instance = DeviceContextReader.Instance;
-                            return instance.GetScreenResolution();
-                        });
+                    if (IsWindowsPlatform)
+                    {
+                        UpdateTelemetryDataProperty(changed, Telemetry.TelemetryDataFlag.ScreenResolution, nameof(Telemetry.TelemetryDataFlag.ScreenResolution),
+                            () =>
+                            {
+                                DeviceContextReader instance = DeviceContextReader.Instance;
+                                return instance.GetScreenResolution();
+                            });
+                    }
 
                     UpdateTelemetryDataProperty(changed, Telemetry.TelemetryDataFlag.Language, nameof(Telemetry.TelemetryDataFlag.Language),
                         () =>
@@ -692,6 +696,71 @@ namespace NishySoftware.Telemetry.ApplicationInsights
         }
     }
 
+    class PlatformBase
+    {
+        static internal bool IsLinuxPlatform
+        {
+            get
+            {
+#if NET45 || NET451 || NET452 || NET46 || NET461 || NET462 || NET470
+                return Environment.OSVersion.Platform == PlatformID.Unix;
+#else
+            return RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+#endif
+            }
+        }
+
+        static internal bool IsWindowsPlatform
+        {
+            get
+            {
+#if NET45 || NET451 || NET452 || NET46 || NET461 || NET462 || NET470
+                return Environment.OSVersion.Platform == PlatformID.Win32S
+                    || Environment.OSVersion.Platform == PlatformID.Win32Windows
+                    || Environment.OSVersion.Platform == PlatformID.Win32NT
+                    || Environment.OSVersion.Platform == PlatformID.WinCE;
+#else
+            return RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+#endif
+            }
+        }
+
+        static string _folderCompany = "nishy software";
+        static string _folderProduct = "nsTelemetry";
+
+        static internal string GetTeremetryFolder()
+        {
+            string appFolder = null;
+            if (IsWindowsPlatform)
+            {
+                var userRootFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                appFolder = System.IO.Path.Combine(userRootFolder, _folderCompany, _folderProduct);
+            }
+            else if (IsLinuxPlatform)
+            {
+                var userRootFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                if (string.IsNullOrWhiteSpace(userRootFolder))
+                {
+                    // XDG Base Directory Specification
+                    //  -               $HOME                   SpecialFolder.Personal
+                    //  XDG_CONFIG_HOME $HOME/.config           SpecialFolder.ApplicationData
+                    //  XDG_DATA_HOME   $HOME/.local/share      SpecialFolder.LocalApplicationData
+                    //  XDG_STATE_HOME  $HOME/.local/state      -
+                    userRootFolder = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+                    userRootFolder = System.IO.Path.Combine(userRootFolder, ".local", ".share");
+                }
+                appFolder = System.IO.Path.Combine(userRootFolder, _folderCompany, _folderProduct);
+            }
+
+            if (string.IsNullOrWhiteSpace(appFolder))
+            {
+                var userRootFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                appFolder = System.IO.Path.Combine(userRootFolder, _folderCompany, _folderProduct);
+            }
+
+            return appFolder;
+        }
+    }
 
     #region Component Initializer
 
@@ -789,7 +858,7 @@ namespace NishySoftware.Telemetry.ApplicationInsights
         }
     }
 
-    class SessionContextReader
+    class SessionContextReader : PlatformBase
     {
         private static SessionContextReader _instance;
         private string _sessionId;
@@ -839,12 +908,12 @@ namespace NishySoftware.Telemetry.ApplicationInsights
             {
                 return this._isFirstSession.Value;
             }
-            var userRootFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            var appFoler = System.IO.Path.Combine(userRootFolder, "nishy software", "Telemetry");
+
+            string appFolder = GetTeremetryFolder();
             var exeName = Path.GetFileName(Assembly.GetEntryAssembly().Location);
             var name = Assembly.GetEntryAssembly().FullName;
-            System.IO.Directory.CreateDirectory(appFoler);
-            var aiPath = System.IO.Path.Combine(appFoler, instrumentationKey + "_" + exeName + ".ai");
+            System.IO.Directory.CreateDirectory(appFolder);
+            var aiPath = System.IO.Path.Combine(appFolder, instrumentationKey + "_" + exeName + ".ai");
             bool isFirstSession = false;
             try
             {
@@ -893,7 +962,7 @@ namespace NishySoftware.Telemetry.ApplicationInsights
         }
     }
 
-    class UserContextReader
+    class UserContextReader : PlatformBase
     {
         private static UserContextReader _instance;
         private string _userId = "";
@@ -930,13 +999,21 @@ namespace NishySoftware.Telemetry.ApplicationInsights
                 return this._userId;
             }
 
-            var userId = GetUserSid();
-            if (userId != null)
+            string userId = null;
+            if (IsWindowsPlatform)
             {
-                // User SIDを使ってUniqueIdを作成するが、少しだけ配置変換して、すぐにはSIDと分からなくする
-                userId = userId.Replace("-", "");
-                userId = userId.Replace("S", "");
-                userId = new String(userId.Reverse().ToArray());
+                userId = GetUserSid();
+                if (userId != null)
+                {
+                    // User SIDを使ってUniqueIdを作成するが、少しだけ配置変換して、すぐにはSIDと分からなくする
+                    userId = userId.Replace("-", "");
+                    userId = userId.Replace("S", "");
+                    userId = new String(userId.Reverse().ToArray());
+                }
+            }
+            else
+            {
+                userId = GetUserGuid();
             }
             return this._userId = userId;
         }
@@ -945,6 +1022,33 @@ namespace NishySoftware.Telemetry.ApplicationInsights
         {
             var sid = System.Security.Principal.WindowsIdentity.GetCurrent().User.ToString();
             return sid;
+        }
+
+        public static string GetUserGuid()
+        {
+            string uid = null;
+            string appFolder = GetTeremetryFolder();
+            System.IO.Directory.CreateDirectory(appFolder);
+            var aiPath = System.IO.Path.Combine(appFolder, "idu.ai");
+            try
+            {
+                if (System.IO.File.Exists(aiPath))
+                {
+                    var line = System.IO.File.ReadLines(aiPath, Encoding.UTF8)?.FirstOrDefault();
+                    line = line?.Trim() ?? "";
+                    if (Guid.TryParse(line, out var result))
+                    {
+                        uid = line;
+                    }
+                }
+                if (string.IsNullOrWhiteSpace(uid))
+                {
+                    uid = Guid.NewGuid().ToString();
+                    System.IO.File.WriteAllText(aiPath, uid + "\r\n", Encoding.UTF8);
+                }
+            }
+            catch { }
+            return uid;
         }
     }
 
@@ -996,7 +1100,7 @@ namespace NishySoftware.Telemetry.ApplicationInsights
         }
     }
 
-    class DeviceContextReader
+    class DeviceContextReader : PlatformBase
     {
         private static DeviceContextReader _instance;
         private string _deviceId = "";
@@ -1059,13 +1163,107 @@ namespace NishySoftware.Telemetry.ApplicationInsights
                 return this._deviceId;
             }
 
-            var deviceId = GetComputerSid();
-            if (deviceId != null)
+            string deviceId = null;
+            if (IsWindowsPlatform)
             {
-                // Machine SIDを使ってUniqueIdを作成するが、少しだけ配置変換して、すぐにはSIDと分からなくする
-                deviceId = deviceId.Replace("-", "");
-                deviceId = deviceId.Replace("S", "");
-                deviceId = new String(deviceId.Reverse().ToArray());
+                deviceId = GetComputerSid();
+                if (deviceId != null)
+                {
+                    // Machine SIDを使ってUniqueIdを作成するが、少しだけ配置変換して、すぐにはSIDと分からなくする
+                    deviceId = deviceId.Replace("-", "");
+                    deviceId = deviceId.Replace("S", "");
+                    deviceId = new String(deviceId.Reverse().ToArray());
+                }
+            }
+            else
+            {
+                string appFolder = GetTeremetryFolder();
+                System.IO.Directory.CreateDirectory(appFolder);
+                var aiPath = System.IO.Path.Combine(appFolder, "idd.ai");
+                try
+                {
+                    if (System.IO.File.Exists(aiPath))
+                    {
+                        var line = System.IO.File.ReadLines(aiPath, Encoding.UTF8)?.FirstOrDefault();
+                        line = line?.Trim() ?? "";
+                        if (Guid.TryParse(line, out var result))
+                        {
+                            deviceId = line;
+                        }
+                    }
+                }
+                catch { }
+                if (string.IsNullOrWhiteSpace(deviceId))
+                {
+                    try
+                    {
+                        var pathDiskById = "/dev/disk/by-id";
+                        if (System.IO.Directory.Exists(pathDiskById))
+                        {
+                            var files = System.IO.Directory.EnumerateFiles(pathDiskById, "scsi-*", SearchOption.TopDirectoryOnly).ToList();
+                            var seed = files.FirstOrDefault(i => i.Contains("-part3"));
+                            if (seed == null)
+                            {
+                                seed = files.FirstOrDefault(i => i.Contains("-part2"));
+                            }
+                            if (seed == null)
+                            {
+                                seed = files.FirstOrDefault(i => i.Contains("-part1"));
+                            }
+                            if (seed == null)
+                            {
+                                files = System.IO.Directory.EnumerateFiles(pathDiskById, "wwn-*", SearchOption.TopDirectoryOnly).ToList();
+                                seed = files.FirstOrDefault(i => i.Contains("-part3"));
+                                if (seed == null)
+                                {
+                                    seed = files.FirstOrDefault(i => i.Contains("-part2"));
+                                }
+                                if (seed == null)
+                                {
+                                    seed = files.FirstOrDefault(i => i.Contains("-part1"));
+                                }
+                            }
+                            if (seed != null)
+                            {
+                                var hashProvider = new SHA256CryptoServiceProvider();
+                                var hashed = string.Join("", hashProvider.ComputeHash(Encoding.UTF8.GetBytes(seed)).Select(x => $"{x:x2}"));
+                                deviceId = hashed.Substring(0, 32);
+                            }
+                        }
+                    }
+                    catch { }
+                    if (string.IsNullOrWhiteSpace(deviceId))
+                    {
+                        try
+                        {
+                            var bytes = GetNetworkAddress();
+                            if ((bytes?.Length ?? 0) >= 4)
+                            {
+                                var guiBytes = new byte[16];
+                                for (int i = 0; i < guiBytes.Length; i++)
+                                {
+                                    guiBytes[i] = (byte)i;
+                                }
+                                for (int i = 0; i < bytes.Length && i < guiBytes.Length; i++)
+                                {
+                                    guiBytes[i] = bytes[i];
+                                }
+                                deviceId = new Guid(guiBytes).ToString();
+                            }
+                        }
+                        catch { }
+                    }
+                    if (string.IsNullOrWhiteSpace(deviceId))
+                    {
+                        deviceId = Guid.NewGuid().ToString();
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(deviceId))
+                    {
+                        deviceId = deviceId.ToLower();
+                        System.IO.File.WriteAllText(aiPath, deviceId + "\r\n", Encoding.UTF8);
+                    }
+                }
             }
 
             return this._deviceId = deviceId;
@@ -1088,6 +1286,33 @@ namespace NishySoftware.Telemetry.ApplicationInsights
             return sid;
         }
 
+        public byte[] GetNetworkAddress()
+        {
+            byte[] address = null;
+
+            NetworkInterface[] allNetworkInterfaces = NetworkInterface.GetAllNetworkInterfaces();
+            var ethernets = allNetworkInterfaces.Where(i => i.NetworkInterfaceType == NetworkInterfaceType.Ethernet
+            || i.NetworkInterfaceType == NetworkInterfaceType.FastEthernetT
+            || i.NetworkInterfaceType == NetworkInterfaceType.GigabitEthernet).OrderBy(i => i.OperationalStatus).ToArray();
+            var wirelesses = allNetworkInterfaces.Where(i => i.NetworkInterfaceType == NetworkInterfaceType.Wireless80211).OrderBy(i => i.OperationalStatus).ToArray();
+            foreach (var item in ethernets.Concat(wirelesses))
+            {
+                try
+                {
+                    var physical = item.GetPhysicalAddress();
+                    var sp = item.Speed;    // if exception occurs, skip
+                    var physicalAddress = physical.GetAddressBytes();
+                    if (!physicalAddress.All(i => i == 0 || i == 0xff))
+                    {
+                        address = physicalAddress;
+                        break;
+                    }
+                }
+                catch { }
+            }
+            return address;
+        }
+
         /// <summary>
         /// Gets the device OEM.
         /// </summary>
@@ -1098,7 +1323,40 @@ namespace NishySoftware.Telemetry.ApplicationInsights
             {
                 return this._deviceManufacturer;
             }
-            return this._deviceManufacturer = this.RunWmiQuery("Win32_ComputerSystem", "Manufacturer", string.Empty);
+            string deviceManufacturer = string.Empty;
+            if (IsWindowsPlatform)
+            {
+                deviceManufacturer = this.RunWmiQuery("Win32_ComputerSystem", "Manufacturer", string.Empty);
+            }
+            else
+            {
+                var pathVender = "/sys/devices/virtual/dmi/id/sys_vendor";
+                var pathVersion = "/proc/version";
+                if (System.IO.File.Exists(pathVender))
+                {
+                    try
+                    {
+                        var line = System.IO.File.ReadLines(pathVender, Encoding.UTF8)?.FirstOrDefault();
+                        line = line?.Trim() ?? "";
+                        deviceManufacturer = line;
+                    }
+                    catch { }
+                }
+                if (deviceManufacturer == string.Empty
+                    && System.IO.File.Exists(pathVersion))
+                {
+                    try
+                    {
+                        var line = System.IO.File.ReadLines(pathVersion, Encoding.UTF8)?.FirstOrDefault();
+                        if (line.Contains("Microsoft") || line.Contains("microsoft"))
+                        {
+                            deviceManufacturer = "Microsoft Corporation";
+                        }
+                    }
+                    catch { }
+                }
+            }
+            return this._deviceManufacturer = deviceManufacturer;
         }
 
         /// <summary>
@@ -1111,7 +1369,47 @@ namespace NishySoftware.Telemetry.ApplicationInsights
             {
                 return this._deviceName;
             }
-            return this._deviceName = this.RunWmiQuery("Win32_ComputerSystem", "Model", string.Empty);
+            string deviceName = string.Empty;
+            if (IsWindowsPlatform)
+            {
+                deviceName = this.RunWmiQuery("Win32_ComputerSystem", "Model", string.Empty);
+            }
+            else
+            {
+                var pathName = "/sys/devices/virtual/dmi/id/product_name";
+                var pathVersion = "/proc/version";
+                if (System.IO.File.Exists(pathName))
+                {
+                    try
+                    {
+                        var line = System.IO.File.ReadLines(pathName, Encoding.UTF8)?.FirstOrDefault();
+                        line = line?.Trim() ?? "";
+                        deviceName = line;
+                    }
+                    catch { }
+                }
+                if (deviceName == string.Empty
+                    && System.IO.File.Exists(pathVersion))
+                {
+                    try
+                    {
+                        var line = System.IO.File.ReadLines(pathVersion, Encoding.UTF8)?.FirstOrDefault();
+                        if (line.Contains("Microsoft") || line.Contains("microsoft"))
+                        {
+                            if (line.Contains("WSL2") || line.Contains("wsl2"))
+                            {
+                                deviceName = "WSL2";
+                            }
+                            else if (line.Contains("WSL") || line.Contains("wsl"))
+                            {
+                                deviceName = "WSL";
+                            }
+                        }
+                    }
+                    catch { }
+                }
+            }
+            return this._deviceName = deviceName;
         }
 
         [DllImport("user32.dll")]
@@ -1243,31 +1541,91 @@ namespace NishySoftware.Telemetry.ApplicationInsights
                 return this._operatingSystem;
             }
 
-            var osProps = GetData("Win32_OperatingSystem", "Version,OSType");
-            if (osProps != null)
+            string operatingSystem = string.Empty;
+            if (IsWindowsPlatform)
             {
-                string version = "";
-                try
+                var osProps = GetData("Win32_OperatingSystem", "Version,OSType");
+                if (osProps != null)
                 {
-                    version = osProps["Version"].Value.ToString();
-                }
-                catch { }
-                try
-                {
-                    var osType = (UInt16)(osProps["OSType"].Value);
-                    if (osType == 18)
+                    string version = "";
+                    try
                     {
-                        version = "Windows NT " + version;
+                        version = osProps["Version"].Value.ToString();
+                    }
+                    catch { }
+                    try
+                    {
+                        var osType = (UInt16)(osProps["OSType"].Value);
+                        if (osType == 18)
+                        {
+                            version = "Windows NT " + version;
+                        }
+                    }
+                    catch { }
+
+                    if (!string.IsNullOrEmpty(version))
+                    {
+                        operatingSystem = version;
                     }
                 }
-                catch { }
-
-                if (!string.IsNullOrEmpty(version))
+            }
+            else
+            {
+                operatingSystem = "Linux";
+                var pathRelease = "/etc/os-release";
+                if (System.IO.File.Exists(pathRelease))
                 {
-                    this._operatingSystem = version;
+                    try
+                    {
+                        /// for WSL2
+                        //NAME="Ubuntu"
+                        //VERSION="20.04.1 LTS (Focal Fossa)"
+                        //ID=ubuntu
+                        //ID_LIKE=debian
+                        //PRETTY_NAME="Ubuntu 20.04.1 LTS"
+                        //VERSION_ID="20.04"
+                        //HOME_URL="https://www.ubuntu.com/"
+                        //SUPPORT_URL="https://help.ubuntu.com/"
+                        //BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
+                        //PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
+                        //VERSION_CODENAME=focal
+                        //UBUNTU_CODENAME=focal
+
+                        // for debian
+                        //PRETTY_NAME="Debian GNU/Linux 10 (buster)"
+                        //NAME="Debian GNU/Linux"
+                        //VERSION_ID="10"
+                        //VERSION="10 (buster)"
+                        //VERSION_CODENAME=buster
+                        //ID=debian
+                        //HOME_URL="https://www.debian.org/"
+                        //SUPPORT_URL="https://www.debian.org/support"
+                        //BUG_REPORT_URL="https://bugs.debian.org/"
+
+                        var lines = System.IO.File.ReadLines(pathRelease, Encoding.UTF8);
+                        var prettyName = lines?.FirstOrDefault(i => i.StartsWith("PRETTY_NAME="))?.Substring(12).Trim('"');
+                        var name = lines?.FirstOrDefault(i => i.StartsWith("NAME="))?.Substring(5).Trim('"');
+                        var versionId = lines?.FirstOrDefault(i => i.StartsWith("VERSION_ID="))?.Substring(11).Trim('"');
+                        if (!string.IsNullOrEmpty(prettyName))
+                        {
+                            operatingSystem = prettyName;
+                        }
+                        else
+                        {
+                            if (!string.IsNullOrEmpty(name))
+                            {
+                                operatingSystem = name;
+                            }
+                            if (!string.IsNullOrEmpty(versionId))
+                            {
+                                operatingSystem += " " + versionId;
+                            }
+                        }
+                    }
+                    catch { }
                 }
             }
-            return this._operatingSystem;
+            return this._operatingSystem = operatingSystem;
         }
 
         /// <summary>
