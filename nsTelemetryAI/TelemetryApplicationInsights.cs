@@ -1577,7 +1577,7 @@ namespace NishySoftware.Telemetry.ApplicationInsights
                 {
                     try
                     {
-                        /// for WSL2
+                        // for WSL2
                         //NAME="Ubuntu"
                         //VERSION="20.04.1 LTS (Focal Fossa)"
                         //ID=ubuntu
