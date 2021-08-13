@@ -107,23 +107,23 @@ namespace NishySoftware.Telemetry.ApplicationInsights
 
         #region Properties
 
-        #region TelemetryDataFlags
-        static Telemetry.TelemetryDataFlag _telemetryDataFlags = 0;
-        public static Telemetry.TelemetryDataFlag TelemetryDataFlags
+        #region CommonDataKinds
+        static TelemetryDataKinds _commonDataKinds = 0;
+        public static TelemetryDataKinds CommonDataKinds
         {
             get
             {
-                return _telemetryDataFlags;
+                return _commonDataKinds;
             }
             set
             {
-                if (_telemetryDataFlags != value)
+                if (_commonDataKinds != value)
                 {
-                    var changed = _telemetryDataFlags ^ value;
-                    _telemetryDataFlags = value;
+                    var changed = _commonDataKinds ^ value;
+                    _commonDataKinds = value;
 
-                    if (_telemetryDataFlags.HasFlag(Telemetry.TelemetryDataFlag.NetworkType)
-                        || _telemetryDataFlags.HasFlag(Telemetry.TelemetryDataFlag.NetworkSpeed))
+                    if (_commonDataKinds.HasFlag(TelemetryDataKinds.NetworkType)
+                        || _commonDataKinds.HasFlag(TelemetryDataKinds.NetworkSpeed))
                     {
                         // 監視が必要
                         System.Net.NetworkInformation.NetworkChange.NetworkAvailabilityChanged += NetworkChange_NetworkAvailabilityChanged;
@@ -135,13 +135,13 @@ namespace NishySoftware.Telemetry.ApplicationInsights
                         System.Net.NetworkInformation.NetworkChange.NetworkAvailabilityChanged -= NetworkChange_NetworkAvailabilityChanged;
                         System.Net.NetworkInformation.NetworkChange.NetworkAddressChanged -= NetworkChange_NetworkAddressChanged;
                     }
-                    if (changed.HasFlag(Telemetry.TelemetryDataFlag.NetworkType)
-                        || changed.HasFlag(Telemetry.TelemetryDataFlag.NetworkSpeed))
+                    if (changed.HasFlag(TelemetryDataKinds.NetworkType)
+                        || changed.HasFlag(TelemetryDataKinds.NetworkSpeed))
                     {
                         UpdateNetworkType();
                     }
 
-                    UpdateTelemetryDataProperty(changed, Telemetry.TelemetryDataFlag.DeviceName, nameof(Telemetry.TelemetryDataFlag.DeviceName),
+                    UpdateTelemetryDataProperty(changed, TelemetryDataKinds.DeviceName, nameof(TelemetryDataKinds.DeviceName),
                         () =>
                         {
                             DeviceContextReader instance = DeviceContextReader.Instance;
@@ -150,7 +150,7 @@ namespace NishySoftware.Telemetry.ApplicationInsights
                             return model;
                         });
 
-                    UpdateTelemetryDataProperty(changed, Telemetry.TelemetryDataFlag.DeviceManufacturer, nameof(Telemetry.TelemetryDataFlag.DeviceManufacturer),
+                    UpdateTelemetryDataProperty(changed, TelemetryDataKinds.DeviceManufacturer, nameof(TelemetryDataKinds.DeviceManufacturer),
                         () =>
                         {
                             DeviceContextReader instance = DeviceContextReader.Instance;
@@ -159,7 +159,7 @@ namespace NishySoftware.Telemetry.ApplicationInsights
 
                     if (IsWindowsPlatform)
                     {
-                        UpdateTelemetryDataProperty(changed, Telemetry.TelemetryDataFlag.ScreenResolution, nameof(Telemetry.TelemetryDataFlag.ScreenResolution),
+                        UpdateTelemetryDataProperty(changed, TelemetryDataKinds.ScreenResolution, nameof(TelemetryDataKinds.ScreenResolution),
                             () =>
                             {
                                 DeviceContextReader instance = DeviceContextReader.Instance;
@@ -167,14 +167,14 @@ namespace NishySoftware.Telemetry.ApplicationInsights
                             });
                     }
 
-                    UpdateTelemetryDataProperty(changed, Telemetry.TelemetryDataFlag.Language, nameof(Telemetry.TelemetryDataFlag.Language),
+                    UpdateTelemetryDataProperty(changed, TelemetryDataKinds.Language, nameof(TelemetryDataKinds.Language),
                         () =>
                         {
                             DeviceContextReader instance = DeviceContextReader.Instance;
                             return instance.GetHostSystemLocale();
                         });
 
-                    UpdateTelemetryDataProperty(changed, Telemetry.TelemetryDataFlag.ExeName, nameof(Telemetry.TelemetryDataFlag.ExeName),
+                    UpdateTelemetryDataProperty(changed, TelemetryDataKinds.ExeName, nameof(TelemetryDataKinds.ExeName),
                         () =>
                         {
                             var asm = System.Reflection.Assembly.GetEntryAssembly();
@@ -182,7 +182,7 @@ namespace NishySoftware.Telemetry.ApplicationInsights
                             return exeName;
                         });
 
-                    UpdateTelemetryDataProperty(changed, Telemetry.TelemetryDataFlag.HostName, nameof(Telemetry.TelemetryDataFlag.HostName),
+                    UpdateTelemetryDataProperty(changed, TelemetryDataKinds.HostName, nameof(TelemetryDataKinds.HostName),
                         () =>
                         {
                             var hostName = Dns.GetHostName();
@@ -193,7 +193,7 @@ namespace NishySoftware.Telemetry.ApplicationInsights
                             return hostName;
                         });
 
-                    UpdateTelemetryDataProperty(changed, Telemetry.TelemetryDataFlag.UserName, nameof(Telemetry.TelemetryDataFlag.UserName),
+                    UpdateTelemetryDataProperty(changed, TelemetryDataKinds.UserName, nameof(TelemetryDataKinds.UserName),
                         () =>
                         {
                             return Environment.UserName;
@@ -202,13 +202,13 @@ namespace NishySoftware.Telemetry.ApplicationInsights
             }
         }
 
-        static void UpdateTelemetryDataProperty(Telemetry.TelemetryDataFlag changed, Telemetry.TelemetryDataFlag flag, string name, Func<string> getValue)
+        static void UpdateTelemetryDataProperty(TelemetryDataKinds changed, TelemetryDataKinds flag, string name, Func<string> getValue)
         {
             if (changed.HasFlag(flag))
             {
                 lock (_globalParams._syncObj)
                 {
-                    if (_telemetryDataFlags.HasFlag(flag))
+                    if (_commonDataKinds.HasFlag(flag))
                     {
                         _globalParams._defaultGlobalProperties[name] = getValue();
                     }
@@ -273,6 +273,15 @@ namespace NishySoftware.Telemetry.ApplicationInsights
             return old;
         }
 
+        public static void SetInstrumentationKey(string instrumentationKey)
+        {
+            var config = Microsoft.ApplicationInsights.Extensibility.TelemetryConfiguration.Active;
+            if (config != null)
+            {
+                config.InstrumentationKey = instrumentationKey;
+            }
+        }
+
         public static bool IsEnabled()
         {
             return _globalParams._globalEnable;
@@ -309,28 +318,28 @@ namespace NishySoftware.Telemetry.ApplicationInsights
             long networkSpeed = 0;
             DeviceContextReader instance = DeviceContextReader.Instance;
             string networkType = null;
-            if (_telemetryDataFlags.HasFlag(Telemetry.TelemetryDataFlag.NetworkType)
-                || _telemetryDataFlags.HasFlag(Telemetry.TelemetryDataFlag.NetworkSpeed))
+            if (_commonDataKinds.HasFlag(TelemetryDataKinds.NetworkType)
+                || _commonDataKinds.HasFlag(TelemetryDataKinds.NetworkSpeed))
             {
                 networkType = instance.GetNetworkType(ref networkSpeed, true);
             }
             lock (_globalParams._syncObj)
             {
-                if (_telemetryDataFlags.HasFlag(Telemetry.TelemetryDataFlag.NetworkType))
+                if (_commonDataKinds.HasFlag(TelemetryDataKinds.NetworkType))
                 {
-                    _globalParams._defaultGlobalProperties[nameof(Telemetry.TelemetryDataFlag.NetworkType)] = networkType;
+                    _globalParams._defaultGlobalProperties[nameof(TelemetryDataKinds.NetworkType)] = networkType;
                 }
                 else
                 {
-                    _globalParams._defaultGlobalProperties.Remove(nameof(Telemetry.TelemetryDataFlag.NetworkType));
+                    _globalParams._defaultGlobalProperties.Remove(nameof(TelemetryDataKinds.NetworkType));
                 }
-                if (_telemetryDataFlags.HasFlag(Telemetry.TelemetryDataFlag.NetworkSpeed))
+                if (_commonDataKinds.HasFlag(TelemetryDataKinds.NetworkSpeed))
                 {
-                    _globalParams._defaultGlobalMetrics[nameof(Telemetry.TelemetryDataFlag.NetworkSpeed)] = networkSpeed;
+                    _globalParams._defaultGlobalMetrics[nameof(TelemetryDataKinds.NetworkSpeed)] = networkSpeed;
                 }
                 else
                 {
-                    _globalParams._defaultGlobalMetrics.Remove(nameof(Telemetry.TelemetryDataFlag.NetworkSpeed));
+                    _globalParams._defaultGlobalMetrics.Remove(nameof(TelemetryDataKinds.NetworkSpeed));
                 }
             }
         }

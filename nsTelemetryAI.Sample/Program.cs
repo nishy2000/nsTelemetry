@@ -37,8 +37,12 @@ namespace nsTelemetryAI.Sample
                     {
                         // [en] Setup common global properties
                         // [ja] 共通グローバルプロパティをセットアップする
-                        NishySoftware.Telemetry.ApplicationInsights.Telemetry.TelemetryDataFlags = NishySoftware.Telemetry.ApplicationInsights.Telemetry.TelemetryDataFlag.All;
+                        NishySoftware.Telemetry.ApplicationInsights.Telemetry.CommonDataKinds = TelemetryDataKinds.All;
                     });
+
+                    // [en] If you do not place the InstrumentationKey in ApplicationInsights.config file, setup the InstrumentationKey using SetInstrumentationKey().
+                    // [ja] ApplicationInsights.configファイルにInstrumentationKeyを配置していない場合は、SetInstrumentationKey()を使用してInstrumentationKeyを設定します。
+                    // NishySoftware.Telemetry.ApplicationInsights.Telemetry.SetInstrumentationKey("your InstrumentationKey");
 
                     // [en] Create an instance of the telemetry interface
                     // [ja] テレメトリーインターフェースのインスタンスを作成する

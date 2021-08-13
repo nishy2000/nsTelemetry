@@ -49,6 +49,92 @@ namespace NishySoftware.Telemetry
     }
 
     /// <summary>
+    /// [en] Flags to specify the Telemetry Data to be applied globally.
+    /// <br/>
+    /// [ja] 全体に適用するTelemetry Dataを指定するためのフラグ
+    /// </summary>
+    [Flags]
+    public enum TelemetryDataKinds : ulong
+    {
+        /// <summary>
+        /// [en] Add NetworkType to GlobalProperties
+        /// <br/>
+        /// [ja] NetworkType をGlobalPropertiesに追加します
+        /// </summary>
+        NetworkType = 1,
+
+        /// <summary>
+        /// [en] Add NetworkType to GlobalProperties
+        /// <br/>
+        /// [ja] NetworkType をGlobalMetricsに追加します
+        /// </summary>
+        NetworkSpeed = 2,
+
+        /// <summary>
+        /// [en] Add DeviceName to GlobalProperties
+        /// <br/>
+        /// [ja] DeviceName をGlobalPropertiesに追加します
+        /// </summary>
+        DeviceName = 4,
+
+        /// <summary>
+        /// [en] Add Manufacture to GlobalProperties
+        /// <br/>
+        /// [ja] Manufacture をGlobalPropertiesに追加します
+        /// </summary>
+        DeviceManufacturer = 8,
+
+        /// <summary>
+        /// [en] Add ScreenResolution to GlobalProperties
+        /// <br/>
+        /// [ja] ScreenResolution をGlobalPropertiesに追加します
+        /// </summary>
+        ScreenResolution = 16,
+
+        /// <summary>
+        /// [en] Add Language to GlobalProperties
+        /// <br/>
+        /// [ja] Language をGlobalPropertiesに追加します
+        /// </summary>
+        Language = 32,
+
+        /// <summary>
+        /// [en] Add ExeName to GlobalProperties
+        /// <br/>
+        /// [ja] ExeName をGlobalPropertiesに追加します
+        /// </summary>
+        ExeName = 64,
+
+        /// <summary>
+        /// [en] Add HostName to GlobalProperties
+        /// <br/>
+        /// [ja] HostName をGlobalPropertiesに追加します
+        /// </summary>
+        HostName = 128,
+
+        /// <summary>
+        /// [en] Add UserName to GlobalProperties
+        /// <br/>
+        /// [ja] UserName をGlobalPropertiesに追加します
+        /// </summary>
+        UserName = 256,
+
+        /// <summary>
+        /// [en] Add all common global properties to GlobalProperties
+        /// <br/>
+        /// [ja] すべての共通グローバルプロパティをGlobalPropertiesに追加します
+        /// </summary>
+        All = 0x00ffffff,
+
+        /// <summary>
+        /// [en] Add default common global properties to GlobalProperties
+        /// <br/>
+        /// [ja] 既定の共通グローバルプロパティをGlobalPropertiesに追加します
+        /// </summary>
+        Default = NetworkType | NetworkSpeed | DeviceName | DeviceManufacturer | ScreenResolution | Language | ExeName,
+    };
+
+    /// <summary>
     /// [en] Interface for Telemetry
     /// <br/>
     /// [ja] Telemetry用のインターフェース

@@ -18,94 +18,8 @@ namespace NishySoftware.Telemetry.ApplicationInsights
     /// <br/>
     /// [ja] <see cref="T:NishySoftware.Telemetry.ITelemetry"/> インターフェースのインスタンスを作成するAPIを公開するクラス
     /// </summary>
-    public class Telemetry
+    public sealed class Telemetry
     {
-        /// <summary>
-        /// [en] Flags to specify the Telemetry Data to be applied globally.
-        /// <br/>
-        /// [ja] 全体に適用するTelemetry Dataを指定するためのフラグ
-        /// </summary>
-        [Flags]
-        public enum TelemetryDataFlag : ulong
-        {
-            /// <summary>
-            /// [en] Add NetworkType to GlobalProperties
-            /// <br/>
-            /// [ja] NetworkType をGlobalPropertiesに追加します
-            /// </summary>
-            NetworkType = 1,
-
-            /// <summary>
-            /// [en] Add NetworkType to GlobalProperties
-            /// <br/>
-            /// [ja] NetworkType をGlobalMetricsに追加します
-            /// </summary>
-            NetworkSpeed = 2,
-
-            /// <summary>
-            /// [en] Add DeviceName to GlobalProperties
-            /// <br/>
-            /// [ja] DeviceName をGlobalPropertiesに追加します
-            /// </summary>
-            DeviceName = 4,
-
-            /// <summary>
-            /// [en] Add Manufacture to GlobalProperties
-            /// <br/>
-            /// [ja] Manufacture をGlobalPropertiesに追加します
-            /// </summary>
-            DeviceManufacturer = 8,
-
-            /// <summary>
-            /// [en] Add ScreenResolution to GlobalProperties
-            /// <br/>
-            /// [ja] ScreenResolution をGlobalPropertiesに追加します
-            /// </summary>
-            ScreenResolution = 16,
-
-            /// <summary>
-            /// [en] Add Language to GlobalProperties
-            /// <br/>
-            /// [ja] Language をGlobalPropertiesに追加します
-            /// </summary>
-            Language = 32,
-
-            /// <summary>
-            /// [en] Add ExeName to GlobalProperties
-            /// <br/>
-            /// [ja] ExeName をGlobalPropertiesに追加します
-            /// </summary>
-            ExeName = 64,
-
-            /// <summary>
-            /// [en] Add HostName to GlobalProperties
-            /// <br/>
-            /// [ja] HostName をGlobalPropertiesに追加します
-            /// </summary>
-            HostName = 128,
-
-            /// <summary>
-            /// [en] Add UserName to GlobalProperties
-            /// <br/>
-            /// [ja] UserName をGlobalPropertiesに追加します
-            /// </summary>
-            UserName = 256,
-
-            /// <summary>
-            /// [en] Add all common global properties to GlobalProperties
-            /// <br/>
-            /// [ja] すべての共通グローバルプロパティをGlobalPropertiesに追加します
-            /// </summary>
-            All = 0x00ffffff,
-
-            /// <summary>
-            /// [en] Add default common global properties to GlobalProperties
-            /// <br/>
-            /// [ja] 既定の共通グローバルプロパティをGlobalPropertiesに追加します
-            /// </summary>
-            Default = NetworkType | NetworkSpeed | DeviceName | DeviceManufacturer | ScreenResolution | Language | ExeName,
-        };
-
         /// <summary>
         /// [en] Static function to create the <see cref="T:NishySoftware.Telemetry.ITelemetry"/> interface
         /// <br/>
@@ -126,15 +40,15 @@ namespace NishySoftware.Telemetry.ApplicationInsights
         /// <br/>
         /// [ja] すべてのテレメトリー送信に適用する共通Telemetryデータを指定するプロパティ
         /// </summary>
-        public static TelemetryDataFlag TelemetryDataFlags
+        public static TelemetryDataKinds CommonDataKinds
         {
             get
             {
-                return TelemetryFactoryApplicationInsights.TelemetryDataFlags;
+                return TelemetryFactoryApplicationInsights.CommonDataKinds;
             }
             set
             {
-                TelemetryFactoryApplicationInsights.TelemetryDataFlags = value;
+                TelemetryFactoryApplicationInsights.CommonDataKinds = value;
             }
         }
 
@@ -183,15 +97,28 @@ namespace NishySoftware.Telemetry.ApplicationInsights
         /// <br/>
         /// [ja] Telemetryを有効化・無効化する静的関数
         /// 無効化されている場合は、<see cref="T:NishySoftware.Telemetry.ITelemetry"/>.TrackXXXX()関数を呼び出しても、テレメトリー送信されません
+        /// </summary>
         /// <returns>
         /// [en] old value
         /// <br/>
         /// [ja] 変更前の値
         /// </returns>
-        /// </summary>
         public static bool Enable(bool enable)
         {
             return TelemetryFactoryApplicationInsights.Enable(enable);
+        }
+
+        /// <summary>
+        /// [en] Setup the InstrumentationKey.
+        /// Setup your InstrumentationKey using this method if you do not place it in the ApplicationInsights.config file.
+        /// <br/>
+        /// [ja] InstrumentationKeyを設定します。
+        /// ApplicationInsights.configファイルにInstrumentationKeyを設定ていない場合は、このメソッドでInstrumentationKeyを設定します。
+        /// </summary>
+        /// <param name="instrumentationKey">[en] InstrumentationKey of Application Insights resource<br/> [ja] Application InsightsリソースのInstrumentationKey</param>
+        public static void SetInstrumentationKey(string instrumentationKey)
+        {
+            TelemetryFactoryApplicationInsights.SetInstrumentationKey(instrumentationKey);
         }
     }
 }
