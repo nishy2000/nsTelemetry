@@ -15,12 +15,13 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{C19DF905-008C-4302-ABFD-4CE632384615}"
 	ProjectSection(SolutionItems) = preProject
 		LICENSE = LICENSE
+		nsTelemetryAI.md = nsTelemetryAI.md
 		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "nsTelemetryAI.Sample", "nsTelemetryAI.Sample\nsTelemetryAI.Sample.csproj", "{EE24DEE0-CC7D-4068-9C1F-E267334F1130}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nsTelemetryAI.Sample.netcore31", "nsTelemetryAI.Sample.netcore31\nsTelemetryAI.Sample.netcore31.csproj", "{E6EB314D-B537-43FD-957A-659DCFB66832}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "nsTelemetryAI.Sample.netcore31", "nsTelemetryAI.Sample.netcore31\nsTelemetryAI.Sample.netcore31.csproj", "{E6EB314D-B537-43FD-957A-659DCFB66832}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
