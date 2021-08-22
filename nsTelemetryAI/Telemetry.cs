@@ -57,6 +57,7 @@ namespace NishySoftware.Telemetry.ApplicationInsights
         /// <br/>
         /// [ja] DeveloperModeを設定・解除する
         /// </summary>
+        /// <param name="enable">[en] new value. <br/> [ja]新しい値。</param>
         /// <remarks>
         /// [en] This library is automatically set to DeveloperMode mode when the Debugger is attached.
         /// When DeveloperMode is enabled, synchronous transmission is always performed when the <see cref="T:NishySoftware.Telemetry.ITelemetry"/>.TrackXXXX() function is called.
@@ -98,6 +99,7 @@ namespace NishySoftware.Telemetry.ApplicationInsights
         /// [ja] Telemetryを有効化・無効化する静的関数
         /// 無効化されている場合は、<see cref="T:NishySoftware.Telemetry.ITelemetry"/>.TrackXXXX()関数を呼び出しても、テレメトリー送信されません
         /// </summary>
+        /// <param name="enable">[en] new value. <br/> [ja]新しい値。</param>
         /// <returns>
         /// [en] old value
         /// <br/>
@@ -113,9 +115,9 @@ namespace NishySoftware.Telemetry.ApplicationInsights
         /// Setup your InstrumentationKey using this method if you do not place it in the ApplicationInsights.config file.
         /// <br/>
         /// [ja] InstrumentationKeyを設定します。
-        /// ApplicationInsights.configファイルにInstrumentationKeyを設定ていない場合は、このメソッドでInstrumentationKeyを設定します。
+        /// ApplicationInsights.configファイルにInstrumentationKeyを設定していない場合は、このメソッドでInstrumentationKeyを設定します。
         /// </summary>
-        /// <param name="instrumentationKey">[en] InstrumentationKey of Application Insights resource<br/> [ja] Application InsightsリソースのInstrumentationKey</param>
+        /// <param name="instrumentationKey">[en] InstrumentationKey of Application Insights resource <br/> [ja] Application InsightsリソースのInstrumentationKey</param>
         public static void SetInstrumentationKey(string instrumentationKey)
         {
             TelemetryFactoryApplicationInsights.SetInstrumentationKey(instrumentationKey);

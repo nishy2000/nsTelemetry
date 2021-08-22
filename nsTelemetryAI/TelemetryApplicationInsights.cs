@@ -59,7 +59,7 @@ namespace NishySoftware.Telemetry.ApplicationInsights
     }
 
 
-    internal class TelemetryGlobalParams
+    internal sealed class TelemetryGlobalParams
     {
         internal TelemetryGlobalParams()
         {
@@ -125,13 +125,15 @@ namespace NishySoftware.Telemetry.ApplicationInsights
                     if (_commonDataKinds.HasFlag(TelemetryDataKinds.NetworkType)
                         || _commonDataKinds.HasFlag(TelemetryDataKinds.NetworkSpeed))
                     {
-                        // 監視が必要
+                        // [en] Monitoring required
+                        // [ja] 監視が必要
                         System.Net.NetworkInformation.NetworkChange.NetworkAvailabilityChanged += NetworkChange_NetworkAvailabilityChanged;
                         System.Net.NetworkInformation.NetworkChange.NetworkAddressChanged += NetworkChange_NetworkAddressChanged;
                     }
                     else
                     {
-                        // 監視が不要
+                        // [en] No monitoring required
+                        // [ja] 監視が不要
                         System.Net.NetworkInformation.NetworkChange.NetworkAvailabilityChanged -= NetworkChange_NetworkAvailabilityChanged;
                         System.Net.NetworkInformation.NetworkChange.NetworkAddressChanged -= NetworkChange_NetworkAddressChanged;
                     }
@@ -775,9 +777,9 @@ namespace NishySoftware.Telemetry.ApplicationInsights
 
     class ComponentTelemetryInitializer : ITelemetryInitializer
     {
-        /// <summary>
-        /// Populates component properties on a telemetry item.
-        /// </summary>
+        ///// <summary>
+        ///// Populates component properties on a telemetry item.
+        ///// </summary>
         public void Initialize(Microsoft.ApplicationInsights.Channel.ITelemetry telemetry)
         {
             if (telemetry == null)
@@ -797,9 +799,9 @@ namespace NishySoftware.Telemetry.ApplicationInsights
         private static ComponentContextReader _instance;
         private string _version = "";
 
-        /// <summary>
-        /// Gets or sets the singleton instance for our application context reader.
-        /// </summary>
+        ///// <summary>
+        ///// Gets or sets the singleton instance for our application context reader.
+        ///// </summary>
         public static ComponentContextReader Instance
         {
             get
@@ -817,13 +819,14 @@ namespace NishySoftware.Telemetry.ApplicationInsights
             }
         }
 
-        /// <summary>
-        /// Gets the component version.
-        /// </summary>
-        /// <returns>The component version.</returns>
+        ///// <summary>
+        ///// Gets the component version.
+        ///// </summary>
+        ///// <returns>The component version.</returns>
         public virtual string GetVersion()
         {
-            // 初期値は "" なので、 null ではなく、""で比較する
+            // [en] default value is "", so compare with "" instead of null
+            // [ja] 初期値は "" なので、 null ではなく、 ""で比較する
             if (this._version != "")
             {
                 return this._version;
@@ -849,9 +852,9 @@ namespace NishySoftware.Telemetry.ApplicationInsights
 
     class SessionTelemetryInitializer : ITelemetryInitializer
     {
-        /// <summary>
-        /// Populates session properties on a telemetry item.
-        /// </summary>
+        ///// <summary>
+        ///// Populates session properties on a telemetry item.
+        ///// </summary>
         public void Initialize(Microsoft.ApplicationInsights.Channel.ITelemetry telemetry)
         {
             if (telemetry == null)
@@ -873,9 +876,9 @@ namespace NishySoftware.Telemetry.ApplicationInsights
         private string _sessionId;
         private bool? _isFirstSession = null;
 
-        /// <summary>
-        /// Gets or sets the singleton instance for our application context reader.
-        /// </summary>
+        ///// <summary>
+        ///// Gets or sets the singleton instance for our application context reader.
+        ///// </summary>
         public static SessionContextReader Instance
         {
             get
@@ -893,10 +896,10 @@ namespace NishySoftware.Telemetry.ApplicationInsights
             }
         }
 
-        /// <summary>
-        /// Gets the session id.
-        /// </summary>
-        /// <returns>The session id.</returns>
+        ///// <summary>
+        ///// Gets the session id.
+        ///// </summary>
+        ///// <returns>The session id.</returns>
         public virtual string GetSessionId()
         {
             if (this._sessionId != null)
@@ -907,10 +910,10 @@ namespace NishySoftware.Telemetry.ApplicationInsights
             return this._sessionId = Guid.NewGuid().ToString();
         }
 
-        /// <summary>
-        /// Gets the first session.
-        /// </summary>
-        /// <returns>The first session flag.</returns>
+        ///// <summary>
+        ///// Gets the first session.
+        ///// </summary>
+        ///// <returns>The first session flag.</returns>
         public virtual bool IsFirstSession(string instrumentationKey)
         {
             if (this._isFirstSession != null)
@@ -954,9 +957,9 @@ namespace NishySoftware.Telemetry.ApplicationInsights
 
     class UserTelemetryInitializer : ITelemetryInitializer
     {
-        /// <summary>
-        /// Populates user properties on a telemetry item.
-        /// </summary>
+        ///// <summary>
+        ///// Populates user properties on a telemetry item.
+        ///// </summary>
         public void Initialize(Microsoft.ApplicationInsights.Channel.ITelemetry telemetry)
         {
             if (telemetry == null)
@@ -976,9 +979,9 @@ namespace NishySoftware.Telemetry.ApplicationInsights
         private static UserContextReader _instance;
         private string _userId = "";
 
-        /// <summary>
-        /// Gets or sets the singleton instance for our application context reader.
-        /// </summary>
+        ///// <summary>
+        ///// Gets or sets the singleton instance for our application context reader.
+        ///// </summary>
         public static UserContextReader Instance
         {
             get
@@ -996,13 +999,14 @@ namespace NishySoftware.Telemetry.ApplicationInsights
             }
         }
 
-        /// <summary>
-        /// Gets the user id.
-        /// </summary>
-        /// <returns>The user id.</returns>
+        ///// <summary>
+        ///// Gets the user id.
+        ///// </summary>
+        ///// <returns>The user id.</returns>
         public virtual string GetUserUniqueId()
         {
-            // 初期値は "" なので、 null ではなく、 ""で比較する
+            // [en] default value is "", so compare with "" instead of null
+            // [ja] 初期値は "" なので、 null ではなく、 ""で比較する
             if (this._userId != "")
             {
                 return this._userId;
@@ -1014,7 +1018,8 @@ namespace NishySoftware.Telemetry.ApplicationInsights
                 userId = GetUserSid();
                 if (userId != null)
                 {
-                    // User SIDを使ってUniqueIdを作成するが、少しだけ配置変換して、すぐにはSIDと分からなくする
+                    // [en] Create a UniqueId using User SID, but transform the placement a bit.
+                    // [ja] User SIDを使ってUniqueIdを作成するが、少しだけ配置を変換する
                     userId = userId.Replace("-", "");
                     userId = userId.Replace("S", "");
                     userId = new String(userId.Reverse().ToArray());
@@ -1067,9 +1072,9 @@ namespace NishySoftware.Telemetry.ApplicationInsights
 
     class DeviceTelemetryInitializer : ITelemetryInitializer
     {
-        /// <summary>
-        /// Populates device properties on a telemetry item.
-        /// </summary>
+        ///// <summary>
+        ///// Populates device properties on a telemetry item.
+        ///// </summary>
         public void Initialize(Microsoft.ApplicationInsights.Channel.ITelemetry telemetry)
         {
             if (telemetry == null)
@@ -1091,7 +1096,8 @@ namespace NishySoftware.Telemetry.ApplicationInsights
 
         public static string AdjustDeviceModel(string model, string oemName)
         {
-            // model名が適切なものが設定されていないものは、区別できるようにメーカー名を追加する
+            // [en] If the appropriate model name is not set, add the manufacturer's name so that it can be distinguished.
+            // [ja] model名が適切なものが設定されていないものは、区別できるようにメーカー名を追加する
             if (string.IsNullOrWhiteSpace(model))
             {
                 model = "";
@@ -1120,9 +1126,9 @@ namespace NishySoftware.Telemetry.ApplicationInsights
         private long _networkSpeed;
         private string _operatingSystem;
 
-        /// <summary>
-        /// Gets or sets the singleton instance for our application context reader.
-        /// </summary>
+        ///// <summary>
+        ///// Gets or sets the singleton instance for our application context reader.
+        ///// </summary>
         public static DeviceContextReader Instance
         {
             get
@@ -1140,33 +1146,34 @@ namespace NishySoftware.Telemetry.ApplicationInsights
             }
         }
 
-        /// <summary>
-        /// Gets the host system locale.
-        /// </summary>
-        /// <returns>The discovered locale.</returns>
+        ///// <summary>
+        ///// Gets the host system locale.
+        ///// </summary>
+        ///// <returns>The discovered locale.</returns>
         public virtual string GetHostSystemLocale()
         {
             return CultureInfo.CurrentCulture.Name;
         }
 
-        /// <summary>
-        /// Gets the type of the device.
-        /// </summary>
-        /// <returns>The type for this device as a hard-coded string.</returns>
+        ///// <summary>
+        ///// Gets the type of the device.
+        ///// </summary>
+        ///// <returns>The type for this device as a hard-coded string.</returns>
         public virtual string GetDeviceType()
         {
             return "PC";
         }
 
-        /// <summary>
-        /// Gets the device unique ID, or uses the fallback if none is available due to application configuration.
-        /// </summary>
-        /// <returns>
-        /// The discovered device identifier.
-        /// </returns>
+        ///// <summary>
+        ///// Gets the device unique ID, or uses the fallback if none is available due to application configuration.
+        ///// </summary>
+        ///// <returns>
+        ///// The discovered device identifier.
+        ///// </returns>
         public virtual string GetDeviceUniqueId()
         {
-            // 初期値は "" なので、 null ではなく、 ""で比較する
+            // [en] default value is "", so compare with "" instead of null
+            // [ja] 初期値は "" なので、 null ではなく、 ""で比較する
             if (this._deviceId != "")
             {
                 return this._deviceId;
@@ -1178,7 +1185,8 @@ namespace NishySoftware.Telemetry.ApplicationInsights
                 deviceId = GetComputerSid();
                 if (deviceId != null)
                 {
-                    // Machine SIDを使ってUniqueIdを作成するが、少しだけ配置変換して、すぐにはSIDと分からなくする
+                    // [en] Create a UniqueId using Machine SID, but transform the placement a bit.
+                    // [ja] Machine SIDを使ってUniqueIdを作成するが、少しだけ配置を変換する
                     deviceId = deviceId.Replace("-", "");
                     deviceId = deviceId.Replace("S", "");
                     deviceId = new String(deviceId.Reverse().ToArray());
@@ -1277,10 +1285,12 @@ namespace NishySoftware.Telemetry.ApplicationInsights
 
             return this._deviceId = deviceId;
         }
+
         public static string GetComputerSid()
         {
             string sid = null;
-            // Local AdministratorのSIDを取得して、後半の -500 を取り除いたのをMachineSIDとする
+            // [en] Get the SID of the Local Administrator and remove the -500 in the second half to make it the MachineSID.
+            // [ja] Local AdministratorのSIDを取得して、後半の -500 を取り除いたのをMachineSIDとする
             var sidRef = new System.Security.Principal.NTAccount("Administrator").Translate(typeof(System.Security.Principal.SecurityIdentifier));
             var sidObj = sidRef as SecurityIdentifier;
             if (sidObj != null)
@@ -1322,10 +1332,10 @@ namespace NishySoftware.Telemetry.ApplicationInsights
             return address;
         }
 
-        /// <summary>
-        /// Gets the device OEM.
-        /// </summary>
-        /// <returns>The discovered OEM.</returns>
+        ///// <summary>
+        ///// Gets the device OEM.
+        ///// </summary>
+        ///// <returns>The discovered OEM.</returns>
         public virtual string GetOemName()
         {
             if (this._deviceManufacturer != null)
@@ -1368,10 +1378,10 @@ namespace NishySoftware.Telemetry.ApplicationInsights
             return this._deviceManufacturer = deviceManufacturer;
         }
 
-        /// <summary>
-        /// Gets the device model.
-        /// </summary>
-        /// <returns>The discovered device model.</returns>
+        ///// <summary>
+        ///// Gets the device model.
+        ///// </summary>
+        ///// <returns>The discovered device model.</returns>
         public virtual string GetDeviceModel()
         {
             if (this._deviceName != null)
@@ -1424,31 +1434,31 @@ namespace NishySoftware.Telemetry.ApplicationInsights
         [DllImport("user32.dll")]
         static extern int GetSystemMetrics(SystemMetric smIndex);
 
-        /// <summary>
-        /// Flags used with the Windows API (User32.dll):GetSystemMetrics(SystemMetric smIndex)
-        ///  
-        /// This Enum and declaration signature was written by Gabriel T. Sharp
-        /// ai_productions@verizon.net or osirisgothra@hotmail.com
-        /// Obtained on pinvoke.net, please contribute your code to support the wiki!
-        /// </summary>
+        ///// <summary>
+        ///// Flags used with the Windows API (User32.dll):GetSystemMetrics(SystemMetric smIndex)
+        /////  
+        ///// This Enum and declaration signature was written by Gabriel T. Sharp
+        ///// ai_productions@verizon.net or osirisgothra@hotmail.com
+        ///// Obtained on pinvoke.net, please contribute your code to support the wiki!
+        ///// </summary>
         public enum SystemMetric : int
         {
-            /// <summary>
-            /// The width of the screen of the primary display monitor, in pixels. This is the same value obtained by calling 
-            /// GetDeviceCaps as follows: GetDeviceCaps( hdcPrimaryMonitor, HORZRES).
-            /// </summary>
+            ///// <summary>
+            ///// The width of the screen of the primary display monitor, in pixels. This is the same value obtained by calling 
+            ///// GetDeviceCaps as follows: GetDeviceCaps( hdcPrimaryMonitor, HORZRES).
+            ///// </summary>
             SM_CXSCREEN = 0,
-            /// <summary>
-            /// The height of the screen of the primary display monitor, in pixels. This is the same value obtained by calling 
-            /// GetDeviceCaps as follows: GetDeviceCaps( hdcPrimaryMonitor, VERTRES).
-            /// </summary>
+            ///// <summary>
+            ///// The height of the screen of the primary display monitor, in pixels. This is the same value obtained by calling 
+            ///// GetDeviceCaps as follows: GetDeviceCaps( hdcPrimaryMonitor, VERTRES).
+            ///// </summary>
             SM_CYSCREEN = 1,
         }
 
-        /// <summary>
-        /// Gets the ScreenResolution.
-        /// </summary>
-        /// <returns>The discovered ScreenResolution.</returns>
+        ///// <summary>
+        ///// Gets the ScreenResolution.
+        ///// </summary>
+        ///// <returns>The discovered ScreenResolution.</returns>
         public string GetScreenResolution(bool force = false)
         {
             if (force || string.IsNullOrEmpty(this._screenResolution))
@@ -1460,10 +1470,10 @@ namespace NishySoftware.Telemetry.ApplicationInsights
             return this._screenResolution;
         }
 
-        /// <summary>
-        /// Gets the network type.
-        /// </summary>
-        /// <returns>The discovered network type.</returns>
+        ///// <summary>
+        ///// Gets the network type.
+        ///// </summary>
+        ///// <returns>The discovered network type.</returns>
         public string GetNetworkType(ref long networkSpeed, bool force = false)
         {
             if (force || string.IsNullOrEmpty(this._networkType))
@@ -1539,10 +1549,10 @@ namespace NishySoftware.Telemetry.ApplicationInsights
             return this._networkType;
         }
 
-        /// <summary>
-        /// Gets the Operating System.
-        /// </summary>
-        /// <returns>The discovered operating system.</returns>
+        ///// <summary>
+        ///// Gets the Operating System.
+        ///// </summary>
+        ///// <returns>The discovered operating system.</returns>
         public virtual string GetOperatingSystem()
         {
             if (this._operatingSystem != null)
@@ -1637,13 +1647,13 @@ namespace NishySoftware.Telemetry.ApplicationInsights
             return this._operatingSystem = operatingSystem;
         }
 
-        /// <summary>
-        /// Runs a single WMI query for a property.
-        /// </summary>
-        /// <param name="table">The table.</param>
-        /// <param name="property">The property.</param>
-        /// <param name="defaultValue">The default value of the property if WMI fails.</param>
-        /// <returns>The value if found, Unknown otherwise.</returns>
+        ///// <summary>
+        ///// Runs a single WMI query for a property.
+        ///// </summary>
+        ///// <param name="table">The table.</param>
+        ///// <param name="property">The property.</param>
+        ///// <param name="defaultValue">The default value of the property if WMI fails.</param>
+        ///// <returns>The value if found, Unknown otherwise.</returns>
         private string RunWmiQuery(string table, string property, string defaultValue)
         {
             try

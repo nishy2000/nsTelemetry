@@ -49,7 +49,7 @@ namespace nsTelemetryAI.Sample
                     var telemetry = NishySoftware.Telemetry.ApplicationInsights.Telemetry.CreateTelemetry();
 
                     // [en] Add custom global property if you need
-                    // [ja] 必要なカスタムグローバルプロパティを追加する
+                    // [ja] 必要ならカスタムグローバルプロパティを追加する
                     var userDomainName = Environment.UserDomainName;
                     lock (telemetry.GlobalSyncObject)
                     {
@@ -61,8 +61,8 @@ namespace nsTelemetryAI.Sample
                     }
 
 #if DEBUG
-                    // [en] For the debug version, use synchronous transmission.
-                    // [ja] デバッグ版のときに、非同期送信を利用する
+                    // [en] For the debug version, use synchronous transmission if you need.
+                    // [ja] 必要なら、デバッグ版のときに、非同期送信を利用する
                     NishySoftware.Telemetry.ApplicationInsights.Telemetry.EnableDeveloperMode(false);
 #endif
 

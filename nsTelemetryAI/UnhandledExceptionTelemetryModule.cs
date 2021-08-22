@@ -1,5 +1,5 @@
 ﻿/* ==============================
-** Copyright 2015, 2020 nishy software
+** Copyright 2015, 2020, 2021 nishy software
 **
 **      First Author : nishy software
 **		Create : 2015/12/07
@@ -18,16 +18,20 @@ namespace NishySoftware.Telemetry.ApplicationInsights
 
     /// <summary>
     /// The module subscribed to AppDomain.CurrentDomain.UnhandledException to send exceptions to ApplicationInsights.
+    /// <br/>
+    /// [ja] ApplicationInsightsに例外の発生を送信するために、AppDomain.CurrentDomain.UnhandledExceptionイベントを購読するためのTelemetryモジュール
     /// </summary>
     public sealed class UnhandledExceptionTelemetryModule : ITelemetryModule, IDisposable
     {
         private readonly ITelemetryChannel channel;
         private readonly Action<UnhandledExceptionEventHandler> unregisterAction;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UnhandledExceptionTelemetryModule"/> class.
-        /// </summary>
+        ///// <summary>
+        ///// Initializes a new instance of the <see cref="UnhandledExceptionTelemetryModule"/> class.
+        ///// </summary>
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
         public UnhandledExceptionTelemetryModule() : this(
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
             action => AppDomain.CurrentDomain.UnhandledException += action,
             action => AppDomain.CurrentDomain.UnhandledException -= action,
             new InMemoryChannel())
@@ -45,17 +49,21 @@ namespace NishySoftware.Telemetry.ApplicationInsights
             registerAction(this.CurrentDomainOnUnhandledException);
         }
 
-        /// <summary>
-        /// Initializes the telemetry module.
-        /// </summary>
+        ///// <summary>
+        ///// Initializes the telemetry module.
+        ///// </summary>
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
         public void Initialize(TelemetryConfiguration configuration)
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
         {
         }
 
-        /// <summary>
-        /// Disposing UnhandledExceptionTelemetryModule instance.
-        /// </summary>
+        ///// <summary>
+        ///// Disposing UnhandledExceptionTelemetryModule instance.
+        ///// </summary>
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
         public void Dispose()
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
         {
             this.unregisterAction(this.CurrentDomainOnUnhandledException);
 
