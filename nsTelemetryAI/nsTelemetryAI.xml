@@ -6,19 +6,10 @@
     <members>
         <member name="T:NishySoftware.Telemetry.ApplicationInsights.DeveloperModeWithDebuggerAttachedTelemetryModule">
             <summary>
-            Telemetry module that sets developer mode to true when is not already set AND managed debugger is attached.
+            [en] Telemetry module that sets developer mode to true when is not already set AND managed debugger is attached.
+            <br/>
+            [ja] デベロッパーモードが設定されていなくて、デバッガーがアタッチされているときに、デベロッパーモードをセットするTelemetryモジュール
             </summary>
-        </member>
-        <member name="F:NishySoftware.Telemetry.ApplicationInsights.DeveloperModeWithDebuggerAttachedTelemetryModule.IsDebuggerAttached">
-            <summary>
-            Function that checks whether debugger is attached with implementation that can be replaced by unit test code.
-            </summary>
-        </member>
-        <member name="M:NishySoftware.Telemetry.ApplicationInsights.DeveloperModeWithDebuggerAttachedTelemetryModule.Initialize(Microsoft.ApplicationInsights.Extensibility.TelemetryConfiguration)">
-            <summary>
-            Gives the opportunity for this telemetry module to initialize configuration object that is passed to it.
-            </summary>
-            <param name="configuration">Configuration object.</param>
         </member>
         <member name="T:NishySoftware.Telemetry.ApplicationInsights.Telemetry">
             <summary>
@@ -52,6 +43,7 @@
             <br/>
             [ja] DeveloperModeを設定・解除する
             </summary>
+            <param name="enable">[en] new value. <br/> [ja]新しい値。</param>
             <remarks>
             [en] This library is automatically set to DeveloperMode mode when the Debugger is attached.
             When DeveloperMode is enabled, synchronous transmission is always performed when the <see cref="T:NishySoftware.Telemetry.ITelemetry"/>.TrackXXXX() function is called.
@@ -87,6 +79,7 @@
             [ja] Telemetryを有効化・無効化する静的関数
             無効化されている場合は、<see cref="T:NishySoftware.Telemetry.ITelemetry"/>.TrackXXXX()関数を呼び出しても、テレメトリー送信されません
             </summary>
+            <param name="enable">[en] new value. <br/> [ja]新しい値。</param>
             <returns>
             [en] old value
             <br/>
@@ -99,193 +92,22 @@
             Setup your InstrumentationKey using this method if you do not place it in the ApplicationInsights.config file.
             <br/>
             [ja] InstrumentationKeyを設定します。
-            ApplicationInsights.configファイルにInstrumentationKeyを設定ていない場合は、このメソッドでInstrumentationKeyを設定します。
+            ApplicationInsights.configファイルにInstrumentationKeyを設定していない場合は、このメソッドでInstrumentationKeyを設定します。
             </summary>
-            <param name="instrumentationKey">[en] InstrumentationKey of Application Insights resource<br/> [ja] Application InsightsリソースのInstrumentationKey</param>
-        </member>
-        <member name="M:NishySoftware.Telemetry.ApplicationInsights.ComponentTelemetryInitializer.Initialize(Microsoft.ApplicationInsights.Channel.ITelemetry)">
-            <summary>
-            Populates component properties on a telemetry item.
-            </summary>
-        </member>
-        <member name="P:NishySoftware.Telemetry.ApplicationInsights.ComponentContextReader.Instance">
-            <summary>
-            Gets or sets the singleton instance for our application context reader.
-            </summary>
-        </member>
-        <member name="M:NishySoftware.Telemetry.ApplicationInsights.ComponentContextReader.GetVersion">
-            <summary>
-            Gets the component version.
-            </summary>
-            <returns>The component version.</returns>
-        </member>
-        <member name="M:NishySoftware.Telemetry.ApplicationInsights.SessionTelemetryInitializer.Initialize(Microsoft.ApplicationInsights.Channel.ITelemetry)">
-            <summary>
-            Populates session properties on a telemetry item.
-            </summary>
-        </member>
-        <member name="P:NishySoftware.Telemetry.ApplicationInsights.SessionContextReader.Instance">
-            <summary>
-            Gets or sets the singleton instance for our application context reader.
-            </summary>
-        </member>
-        <member name="M:NishySoftware.Telemetry.ApplicationInsights.SessionContextReader.GetSessionId">
-            <summary>
-            Gets the session id.
-            </summary>
-            <returns>The session id.</returns>
-        </member>
-        <member name="M:NishySoftware.Telemetry.ApplicationInsights.SessionContextReader.IsFirstSession(System.String)">
-            <summary>
-            Gets the first session.
-            </summary>
-            <returns>The first session flag.</returns>
-        </member>
-        <member name="M:NishySoftware.Telemetry.ApplicationInsights.UserTelemetryInitializer.Initialize(Microsoft.ApplicationInsights.Channel.ITelemetry)">
-            <summary>
-            Populates user properties on a telemetry item.
-            </summary>
-        </member>
-        <member name="P:NishySoftware.Telemetry.ApplicationInsights.UserContextReader.Instance">
-            <summary>
-            Gets or sets the singleton instance for our application context reader.
-            </summary>
-        </member>
-        <member name="M:NishySoftware.Telemetry.ApplicationInsights.UserContextReader.GetUserUniqueId">
-            <summary>
-            Gets the user id.
-            </summary>
-            <returns>The user id.</returns>
-        </member>
-        <member name="M:NishySoftware.Telemetry.ApplicationInsights.DeviceTelemetryInitializer.Initialize(Microsoft.ApplicationInsights.Channel.ITelemetry)">
-            <summary>
-            Populates device properties on a telemetry item.
-            </summary>
-        </member>
-        <member name="P:NishySoftware.Telemetry.ApplicationInsights.DeviceContextReader.Instance">
-            <summary>
-            Gets or sets the singleton instance for our application context reader.
-            </summary>
-        </member>
-        <member name="M:NishySoftware.Telemetry.ApplicationInsights.DeviceContextReader.GetHostSystemLocale">
-            <summary>
-            Gets the host system locale.
-            </summary>
-            <returns>The discovered locale.</returns>
-        </member>
-        <member name="M:NishySoftware.Telemetry.ApplicationInsights.DeviceContextReader.GetDeviceType">
-            <summary>
-            Gets the type of the device.
-            </summary>
-            <returns>The type for this device as a hard-coded string.</returns>
-        </member>
-        <member name="M:NishySoftware.Telemetry.ApplicationInsights.DeviceContextReader.GetDeviceUniqueId">
-            <summary>
-            Gets the device unique ID, or uses the fallback if none is available due to application configuration.
-            </summary>
-            <returns>
-            The discovered device identifier.
-            </returns>
-        </member>
-        <member name="M:NishySoftware.Telemetry.ApplicationInsights.DeviceContextReader.GetOemName">
-            <summary>
-            Gets the device OEM.
-            </summary>
-            <returns>The discovered OEM.</returns>
-        </member>
-        <member name="M:NishySoftware.Telemetry.ApplicationInsights.DeviceContextReader.GetDeviceModel">
-            <summary>
-            Gets the device model.
-            </summary>
-            <returns>The discovered device model.</returns>
-        </member>
-        <member name="T:NishySoftware.Telemetry.ApplicationInsights.DeviceContextReader.SystemMetric">
-            <summary>
-            Flags used with the Windows API (User32.dll):GetSystemMetrics(SystemMetric smIndex)
-             
-            This Enum and declaration signature was written by Gabriel T. Sharp
-            ai_productions@verizon.net or osirisgothra@hotmail.com
-            Obtained on pinvoke.net, please contribute your code to support the wiki!
-            </summary>
-        </member>
-        <member name="F:NishySoftware.Telemetry.ApplicationInsights.DeviceContextReader.SystemMetric.SM_CXSCREEN">
-            <summary>
-            The width of the screen of the primary display monitor, in pixels. This is the same value obtained by calling 
-            GetDeviceCaps as follows: GetDeviceCaps( hdcPrimaryMonitor, HORZRES).
-            </summary>
-        </member>
-        <member name="F:NishySoftware.Telemetry.ApplicationInsights.DeviceContextReader.SystemMetric.SM_CYSCREEN">
-            <summary>
-            The height of the screen of the primary display monitor, in pixels. This is the same value obtained by calling 
-            GetDeviceCaps as follows: GetDeviceCaps( hdcPrimaryMonitor, VERTRES).
-            </summary>
-        </member>
-        <member name="M:NishySoftware.Telemetry.ApplicationInsights.DeviceContextReader.GetScreenResolution(System.Boolean)">
-            <summary>
-            Gets the ScreenResolution.
-            </summary>
-            <returns>The discovered ScreenResolution.</returns>
-        </member>
-        <member name="M:NishySoftware.Telemetry.ApplicationInsights.DeviceContextReader.GetNetworkType(System.Int64@,System.Boolean)">
-            <summary>
-            Gets the network type.
-            </summary>
-            <returns>The discovered network type.</returns>
-        </member>
-        <member name="M:NishySoftware.Telemetry.ApplicationInsights.DeviceContextReader.GetOperatingSystem">
-            <summary>
-            Gets the Operating System.
-            </summary>
-            <returns>The discovered operating system.</returns>
-        </member>
-        <member name="M:NishySoftware.Telemetry.ApplicationInsights.DeviceContextReader.RunWmiQuery(System.String,System.String,System.String)">
-            <summary>
-            Runs a single WMI query for a property.
-            </summary>
-            <param name="table">The table.</param>
-            <param name="property">The property.</param>
-            <param name="defaultValue">The default value of the property if WMI fails.</param>
-            <returns>The value if found, Unknown otherwise.</returns>
+            <param name="instrumentationKey">[en] InstrumentationKey of Application Insights resource <br/> [ja] Application InsightsリソースのInstrumentationKey</param>
         </member>
         <member name="T:NishySoftware.Telemetry.ApplicationInsights.UnhandledExceptionTelemetryModule">
             <summary>
             The module subscribed to AppDomain.CurrentDomain.UnhandledException to send exceptions to ApplicationInsights.
-            </summary>
-        </member>
-        <member name="M:NishySoftware.Telemetry.ApplicationInsights.UnhandledExceptionTelemetryModule.#ctor">
-            <summary>
-            Initializes a new instance of the <see cref="T:NishySoftware.Telemetry.ApplicationInsights.UnhandledExceptionTelemetryModule"/> class.
-            </summary>
-        </member>
-        <member name="M:NishySoftware.Telemetry.ApplicationInsights.UnhandledExceptionTelemetryModule.Initialize(Microsoft.ApplicationInsights.Extensibility.TelemetryConfiguration)">
-            <summary>
-            Initializes the telemetry module.
-            </summary>
-        </member>
-        <member name="M:NishySoftware.Telemetry.ApplicationInsights.UnhandledExceptionTelemetryModule.Dispose">
-            <summary>
-            Disposing UnhandledExceptionTelemetryModule instance.
+            <br/>
+            [ja] ApplicationInsightsに例外の発生を送信するために、AppDomain.CurrentDomain.UnhandledExceptionイベントを購読するためのTelemetryモジュール
             </summary>
         </member>
         <member name="T:NishySoftware.Telemetry.ApplicationInsights.UnobservedExceptionTelemetryModule">
             <summary>
             The module subscribed to TaskScheduler.UnobservedTaskException to send exceptions to ApplicationInsights.
-            </summary>
-        </member>
-        <member name="M:NishySoftware.Telemetry.ApplicationInsights.UnobservedExceptionTelemetryModule.#ctor">
-            <summary>
-            Initializes a new instance of the <see cref="T:NishySoftware.Telemetry.ApplicationInsights.UnobservedExceptionTelemetryModule" /> class.
-            </summary>
-        </member>
-        <member name="M:NishySoftware.Telemetry.ApplicationInsights.UnobservedExceptionTelemetryModule.Initialize(Microsoft.ApplicationInsights.Extensibility.TelemetryConfiguration)">
-            <summary>
-            Initializes the telemetry module.
-            </summary>
-            <param name="configuration">Telemetry Configuration used for creating TelemetryClient for sending exceptions to ApplicationInsights.</param>
-        </member>
-        <member name="M:NishySoftware.Telemetry.ApplicationInsights.UnobservedExceptionTelemetryModule.Dispose">
-            <summary>
-            Disposing TaskSchedulerOnUnobservedTaskException instance.
+            <br/>
+            [ja] ApplicationInsightsに例外の発生を送信するために、TaskScheduler.UnobservedTaskExceptionイベントを購読するためのTelemetryモジュール
             </summary>
         </member>
         <member name="T:NishySoftware.Telemetry.TriggerType">

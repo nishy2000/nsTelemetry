@@ -24,6 +24,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "nsTelemetryAI.Sample", "nsT
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "nsTelemetryAI.Sample.netcore31", "nsTelemetryAI.Sample.netcore31\nsTelemetryAI.Sample.netcore31.csproj", "{E6EB314D-B537-43FD-957A-659DCFB66832}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "images", "images", "{21666A2E-474E-4238-A579-C48233A38EF6}"
+	ProjectSection(SolutionItems) = preProject
+		images\nsTelemetry-AppInsight-sample-en.png = images\nsTelemetry-AppInsight-sample-en.png
+		images\nsTelemetry-AppInsight-sample-ja.png = images\nsTelemetry-AppInsight-sample-ja.png
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
