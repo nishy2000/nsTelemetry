@@ -5,9 +5,9 @@
     <TargetFrameworks>net452;netstandard2.0</TargetFrameworks>
     <AssemblyName>nsTelemetryAI</AssemblyName>
     <AssemblyTitle>Telemetry library for ApplicationInsights</AssemblyTitle>
-    <AssemblyVersion>2.1.0.9018</AssemblyVersion>
-    <FileVersion>2.1.0.9018</FileVersion>
-    <Version>2.1.0-alpha01</Version>
+    <AssemblyVersion>2.1.0.9180</AssemblyVersion>
+    <FileVersion>2.1.0.9180</FileVersion>
+    <Version>2.1.0</Version>
     <RootNamespace>NishySoftware.Telemetry.ApplicationInsights</RootNamespace>
     <Company>nishy software</Company>
     <Authors>nishy software</Authors>
@@ -19,7 +19,7 @@
     <RepositoryUrl>https://github.com/nishy2000/nsTelemetry</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>Desktop App ApplicationInsisghts nsTelemetryAI</PackageTags>
-    <Description>Provides the ability to collect telemetry with ApplicationInsights for desktop app</Description>
+    <Description>Provides the ability to collect telemetry with ApplicationInsights for PC app</Description>
     <PackageReleaseNotes>
       Changes
       - Initial public version
