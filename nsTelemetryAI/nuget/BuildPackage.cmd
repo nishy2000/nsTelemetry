@@ -52,7 +52,7 @@ ECHO =======================
 ECHO Sign modules
 ECHO -----------------------
 SET SIGN_FILES=
-SET SIGN_FILES=%SIGN_FILES% "bin\Release\net45\nsTelemetryAI.dll"
+SET SIGN_FILES=%SIGN_FILES% "bin\Release\net452\nsTelemetryAI.dll"
 SET SIGN_FILES=%SIGN_FILES% "bin\Release\netstandard2.0\nsTelemetryAI.dll"
 
 :SIGN_START
@@ -85,11 +85,11 @@ ECHO Backup signed modules
 ECHO -----------------------
 
 mkdir "%SIGNED_FOLER%"
-mkdir "%SIGNED_FOLER%\net45"
+mkdir "%SIGNED_FOLER%\net452"
 mkdir "%SIGNED_FOLER%\netstandard2.0"
 
 REM  NishySoftware.Telemetry.ApplicationInsights modules
-COPY "bin\Release\net45\nsTelemetryAI.dll" "%SIGNED_FOLER%\net45\" >nul
+COPY "bin\Release\net452\nsTelemetryAI.dll" "%SIGNED_FOLER%\net452\" >nul
 IF ERRORLEVEL 1 GOTO ERROR
 COPY "bin\Release\netstandard2.0\nsTelemetryAI.dll" "%SIGNED_FOLER%\netstandard2.0\" >nul
 IF ERRORLEVEL 1 GOTO ERROR
@@ -100,8 +100,8 @@ ECHO Copy signed resource files to obj folder
 ECHO -----------------------
 
 REM  NishySoftware.Telemetry.ApplicationInsights modules
-SET COPY_SOURCE=bin\Release\net45
-SET COPY_DEST=obj\Release\net45
+SET COPY_SOURCE=bin\Release\net452
+SET COPY_DEST=obj\Release\net452
 COPY "%COPY_SOURCE%\nsTelemetryAI.dll" "%COPY_DEST%\" >nul
 IF ERRORLEVEL 1 GOTO ERROR
 

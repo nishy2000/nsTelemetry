@@ -2,16 +2,16 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFrameworks>net45;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net452;netstandard2.0</TargetFrameworks>
     <AssemblyName>nsTelemetryAI</AssemblyName>
     <AssemblyTitle>Telemetry library for ApplicationInsights</AssemblyTitle>
-    <AssemblyVersion>2.0.0.6280</AssemblyVersion>
-    <FileVersion>2.0.0.6280</FileVersion>
-    <Version>2.0.0-alpha05</Version>
+    <AssemblyVersion>2.1.0.9018</AssemblyVersion>
+    <FileVersion>2.1.0.9018</FileVersion>
+    <Version>2.1.0-alpha01</Version>
     <RootNamespace>NishySoftware.Telemetry.ApplicationInsights</RootNamespace>
     <Company>nishy software</Company>
     <Authors>nishy software</Authors>
-    <Copyright>©2015, 2017, 2018, 2020 nishy software</Copyright>
+    <Copyright>©2015, 2017, 2018, 2020, 2021 nishy software</Copyright>
     <PackageId>NishySoftware.Telemetry.ApplicationInsights</PackageId>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
@@ -49,7 +49,7 @@
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
     <PackageReference Include="System.Management" Version="4.7.0" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net45'">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net452'">
     <Reference Include="System.Management" />
   </ItemGroup>
 
