@@ -93,6 +93,9 @@ namespace nsTelemetryAI.Sample
                     "Duration", duration,
                     "ExitCode", exitCode.ToString());
                 Telemetry.Flush();
+                // [en] Wait a bit after calling Telemetry.Flush()
+                // [ja] Telemetry.Flush()を呼び出した後は少し待ちます。
+                Thread.Sleep(1000);
             }
         }
         #endregion Methods
