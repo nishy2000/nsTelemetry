@@ -1,5 +1,7 @@
 # nsTelemetry (NishySoftware.Telemetry.ApplicationInsights)
 
+[Click here](https://nishy-software.com/ja/nstelemetry/) for Japanese page (日本語ページは[こちら](https://nishy-software.com/ja/nstelemetry/))
+
 ## Development status
 
 [![Build Status (develop)](https://nishy-software.visualstudio.com/nsTelemetry/_apis/build/status/nishy2000.nsTelemetry?branchName=develop&label=develop)](https://nishy-software.visualstudio.com/nsTelemetry/_build/latest?definitionId=6&branchName=develop)
@@ -150,6 +152,8 @@ namespace nsTelemetryAI.Sample
                     "Duration", duration,
                     "ExitCode", exitCode.ToString());
                 Telemetry.Flush();
+                // [en] Wait a bit after calling Telemetry.Flush()
+                Thread.Sleep(1000);
             }
         }
         #endregion Methods
