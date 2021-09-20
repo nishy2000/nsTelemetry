@@ -1,6 +1,6 @@
-# nsTelemetry (NishySoftware.Telemetry.ApplicationInsights)
+ï»¿# nsTelemetry (NishySoftware.Telemetry.ApplicationInsights)
 
-[Click here](https://nishy-software.com/ja/nstelemetry/) for Japanese page (“ú–{Œêƒy[ƒW‚Í[‚±‚¿‚ç](https://nishy-software.com/ja/nstelemetry/))
+[Click here](https://nishy-software.com/ja/nstelemetry/) for Japanese page (æ—¥æœ¬èªãƒšãƒ¼ã‚¸ã¯[ã“ã¡ã‚‰](https://nishy-software.com/ja/nstelemetry/))
 
 ## Development status
 
