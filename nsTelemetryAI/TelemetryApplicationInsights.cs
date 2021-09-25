@@ -25,6 +25,7 @@ namespace NishySoftware.Telemetry.ApplicationInsights
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
+    using System.Security;
     using System.Security.Cryptography;
     using System.Security.Principal;
     using System.Reflection;
@@ -1602,13 +1603,19 @@ namespace NishySoftware.Telemetry.ApplicationInsights
                         var line = System.IO.File.ReadLines(pathVersion, Encoding.UTF8)?.FirstOrDefault();
                         if (line.Contains("Microsoft") || line.Contains("microsoft"))
                         {
+                            // Linux version 5.10.16.3-microsoft-standard-WSL2 (oe-user@oe-host) (x86_64-msft-linux-gcc (GCC) 9.3.0, GNU ld (GNU Binutils) 2.34.0.20200220) #1 SMP Fri Apr 2 22:23:49 UTC 2021
                             if (line.Contains("WSL2") || line.Contains("wsl2"))
                             {
-                                deviceName = "WSL2";
+                                deviceName = "WSL 2";
                             }
                             else if (line.Contains("WSL") || line.Contains("wsl"))
                             {
                                 deviceName = "WSL";
+                            }
+                            // Linux version 4.4.0-19041-Microsoft (Microsoft@Microsoft.com) (gcc version 5.4.0 (GCC) ) #1237-Microsoft Sat Sep 11 14:32:00 PST 2021
+                            else if (line.Contains("Microsoft@Microsoft.com") || line.Contains("microsoft@microsoft.com"))
+                            {
+                                deviceName = "WSL 1";
                             }
                         }
                     }
