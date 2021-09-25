@@ -71,6 +71,7 @@ namespace NishySoftware.Telemetry.ApplicationInsights
         internal readonly Dictionary<string, double> _defaultGlobalMetrics = new Dictionary<string, double>();
         internal readonly IDictionary<string, string> _defaultGlobalExceptionProperties = new Dictionary<string, string>();
         internal readonly IDictionary<string, double> _defaultGlobalExceptionMetrics = new Dictionary<string, double>();
+        internal TelemetryConfiguration _config;
     };
 
     class TelemetryFactoryApplicationInsights : PlatformBase
@@ -78,13 +79,21 @@ namespace NishySoftware.Telemetry.ApplicationInsights
         #region Constructors / Destructor
         static TelemetryFactoryApplicationInsights()
         {
-            var config = TelemetryConfiguration.Active;
-#if DEBUG
-            config.TelemetryChannel.DeveloperMode = true;
+#if true
+            var configXml = ReadConfigurationXml();
+            var config = TelemetryConfiguration.CreateFromConfiguration(configXml);
 #else
-            config.TelemetryChannel.DeveloperMode = System.Diagnostics.Debugger.IsAttached;
+            var config = TelemetryConfiguration.Active;
 #endif
-            if (config.TelemetryChannel.DeveloperMode.HasValue
+            _globalParams._config = config;
+#if DEBUG
+            var isAttached = true;
+#else
+            var isAttached = System.Diagnostics.Debugger.IsAttached;
+#endif
+
+            if (isAttached
+                || config.TelemetryChannel.DeveloperMode.HasValue
                 && config.TelemetryChannel.DeveloperMode.Value == true)
             {
                 var devKey = GetDevKeyFromConfigurationXml();
@@ -102,7 +111,7 @@ namespace NishySoftware.Telemetry.ApplicationInsights
         #endregion Constructors / Destructor
 
         #region Fields
-        static readonly TelemetryGlobalParams _globalParams = new TelemetryGlobalParams();
+        static internal readonly TelemetryGlobalParams _globalParams = new TelemetryGlobalParams();
         #endregion Fields
 
         #region Properties
@@ -265,9 +274,12 @@ namespace NishySoftware.Telemetry.ApplicationInsights
         public static bool? EnableDeveloperMode(bool enable)
         {
             bool? old = null;
+#if true
+            var config = _globalParams._config;
+#else
             var config = Microsoft.ApplicationInsights.Extensibility.TelemetryConfiguration.Active;
-            if (config != null
-                && config.TelemetryChannel != null)
+#endif
+            if (config?.TelemetryChannel != null)
             {
                 old = config.TelemetryChannel.DeveloperMode;
                 config.TelemetryChannel.DeveloperMode = false;
@@ -277,7 +289,11 @@ namespace NishySoftware.Telemetry.ApplicationInsights
 
         public static void SetInstrumentationKey(string instrumentationKey)
         {
+#if true
+            var config = _globalParams._config;
+#else
             var config = Microsoft.ApplicationInsights.Extensibility.TelemetryConfiguration.Active;
+#endif
             if (config != null)
             {
                 config.InstrumentationKey = instrumentationKey;
@@ -348,11 +364,50 @@ namespace NishySoftware.Telemetry.ApplicationInsights
 
         static string ReadConfigurationXml()
         {
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ApplicationInsights.config");
-            if (File.Exists(path))
+            string configFilePath;
+            try
             {
-                return File.ReadAllText(path);
+                // Config file should be in the base directory of the app domain
+                configFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ApplicationInsights.config");
             }
+            catch (SecurityException)
+            {
+                // CoreEventSource.Log.ApplicationInsightsConfigNotAccessibleWarning();
+                return string.Empty;
+            }
+
+            try
+            {
+                // Ensure config file actually exists
+                if (File.Exists(configFilePath))
+                {
+                    return File.ReadAllText(configFilePath);
+                }
+            }
+            catch (FileNotFoundException)
+            {
+                // For cases when file was deleted/modified while reading
+                // CoreEventSource.Log.ApplicationInsightsConfigNotFoundWarning(configFilePath);
+            }
+            catch (DirectoryNotFoundException)
+            {
+                // For cases when file was deleted/modified while reading
+                // CoreEventSource.Log.ApplicationInsightsConfigNotFoundWarning(configFilePath);
+            }
+            catch (IOException)
+            {
+                // For cases when file was deleted/modified while reading
+                // CoreEventSource.Log.ApplicationInsightsConfigNotFoundWarning(configFilePath);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                // CoreEventSource.Log.ApplicationInsightsConfigNotFoundWarning(configFilePath);
+            }
+            catch (SecurityException)
+            {
+                // CoreEventSource.Log.ApplicationInsightsConfigNotFoundWarning(configFilePath);
+            }
+
             return string.Empty;
         }
 
@@ -398,7 +453,11 @@ namespace NishySoftware.Telemetry.ApplicationInsights
         public TelemetryApplicationInsights(TelemetryGlobalParams globalParams, TelemetryConfiguration configuration = null)
         {
             this._globalParams = globalParams;
+#if true
+            this._configuration = configuration ?? globalParams._config;
+#else
             this._configuration = configuration ?? TelemetryConfiguration.Active;
+#endif
         }
         #endregion Constructors / Destructor
 
@@ -739,7 +798,7 @@ namespace NishySoftware.Telemetry.ApplicationInsights
         static string _folderCompany = "nishy software";
         static string _folderProduct = "nsTelemetry";
 
-        static internal string GetTeremetryFolder()
+        static internal string GetTelemetryFolder()
         {
             string appFolder = null;
             if (IsWindowsPlatform)
@@ -921,7 +980,7 @@ namespace NishySoftware.Telemetry.ApplicationInsights
                 return this._isFirstSession.Value;
             }
 
-            string appFolder = GetTeremetryFolder();
+            string appFolder = GetTelemetryFolder();
             var exeName = Path.GetFileName(Assembly.GetEntryAssembly().Location);
             var name = Assembly.GetEntryAssembly().FullName;
             System.IO.Directory.CreateDirectory(appFolder);
@@ -1041,7 +1100,7 @@ namespace NishySoftware.Telemetry.ApplicationInsights
         public static string GetUserGuid()
         {
             string uid = null;
-            string appFolder = GetTeremetryFolder();
+            string appFolder = GetTelemetryFolder();
             System.IO.Directory.CreateDirectory(appFolder);
             var aiPath = System.IO.Path.Combine(appFolder, "idu.ai");
             try
@@ -1194,7 +1253,7 @@ namespace NishySoftware.Telemetry.ApplicationInsights
             }
             else
             {
-                string appFolder = GetTeremetryFolder();
+                string appFolder = GetTelemetryFolder();
                 System.IO.Directory.CreateDirectory(appFolder);
                 var aiPath = System.IO.Path.Combine(appFolder, "idd.ai");
                 try

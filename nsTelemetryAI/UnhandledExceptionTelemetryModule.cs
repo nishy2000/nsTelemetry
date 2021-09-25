@@ -104,7 +104,11 @@ namespace NishySoftware.Telemetry.ApplicationInsights
         {
             //WindowsServerEventSource.Log.CurrentDomainOnUnhandledException();
 
+#if true
+            var telemetryClient = this.GetTelemetryClient(TelemetryFactoryApplicationInsights._globalParams._config);
+#else
             var telemetryClient = this.GetTelemetryClient(TelemetryConfiguration.Active);
+#endif
 
             var exp = new ExceptionTelemetry(unhandledExceptionEventArgs.ExceptionObject as Exception)
             {
