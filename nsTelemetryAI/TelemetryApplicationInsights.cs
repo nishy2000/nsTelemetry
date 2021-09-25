@@ -1117,7 +1117,7 @@ namespace NishySoftware.Telemetry.ApplicationInsights
                 if (string.IsNullOrWhiteSpace(uid))
                 {
                     uid = Guid.NewGuid().ToString();
-                    System.IO.File.WriteAllText(aiPath, uid + "\r\n", Encoding.UTF8);
+                    System.IO.File.AppendAllLines(aiPath, new List<string> { uid }, Encoding.UTF8);
                 }
             }
             catch { }
@@ -1269,6 +1269,10 @@ namespace NishySoftware.Telemetry.ApplicationInsights
                     }
                 }
                 catch { }
+                if (this._deviceId != "")
+                {
+                    return this._deviceId;
+                }
                 if (string.IsNullOrWhiteSpace(deviceId))
                 {
                     try
@@ -1308,6 +1312,10 @@ namespace NishySoftware.Telemetry.ApplicationInsights
                         }
                     }
                     catch { }
+                    if (this._deviceId != "")
+                    {
+                        return this._deviceId;
+                    }
                     if (string.IsNullOrWhiteSpace(deviceId))
                     {
                         try
@@ -1329,6 +1337,10 @@ namespace NishySoftware.Telemetry.ApplicationInsights
                         }
                         catch { }
                     }
+                    if (this._deviceId != "")
+                    {
+                        return this._deviceId;
+                    }
                     if (string.IsNullOrWhiteSpace(deviceId))
                     {
                         deviceId = Guid.NewGuid().ToString();
@@ -1337,9 +1349,14 @@ namespace NishySoftware.Telemetry.ApplicationInsights
                     if (!string.IsNullOrWhiteSpace(deviceId))
                     {
                         deviceId = deviceId.ToLower();
-                        System.IO.File.WriteAllText(aiPath, deviceId + "\r\n", Encoding.UTF8);
+                        System.IO.File.AppendAllLines(aiPath, new List<string> { deviceId }, Encoding.UTF8);
                     }
                 }
+            }
+
+            if (this._deviceId != "")
+            {
+                return this._deviceId;
             }
 
             return this._deviceId = deviceId;
@@ -1373,22 +1390,133 @@ namespace NishySoftware.Telemetry.ApplicationInsights
             || i.NetworkInterfaceType == NetworkInterfaceType.FastEthernetT
             || i.NetworkInterfaceType == NetworkInterfaceType.GigabitEthernet).OrderBy(i => i.OperationalStatus).ToArray();
             var wirelesses = allNetworkInterfaces.Where(i => i.NetworkInterfaceType == NetworkInterfaceType.Wireless80211).OrderBy(i => i.OperationalStatus).ToArray();
+            var physicalAddresses = new List<byte[]>();
             foreach (var item in ethernets.Concat(wirelesses))
             {
                 try
                 {
                     var physical = item.GetPhysicalAddress();
-                    var sp = item.Speed;    // if exception occurs, skip
                     var physicalAddress = physical.GetAddressBytes();
+#if DEBUG
+                    System.Diagnostics.Debug.WriteLine(string.Join(":", physicalAddress.Select(i => i.ToString("x2"))));
+#endif
                     if (!physicalAddress.All(i => i == 0 || i == 0xff))
                     {
+                        physicalAddresses.Add(physicalAddress);
+
+                        var sp = item.Speed;    // if exception occurs, skip
                         address = physicalAddress;
                         break;
                     }
                 }
                 catch { }
             }
+            if (address == null)
+            {
+                foreach (var physicalAddress in physicalAddresses)
+                {
+                    if (!IsVirtualAddress(physicalAddress))
+                    {
+                        address = physicalAddress;
+                        break;
+                    }
+                }
+            }
+            if (address == null)
+            {
+                address = physicalAddresses.FirstOrDefault();
+            }
             return address;
+        }
+
+        bool IsVirtualAddress(byte[] physicalAddress)
+        {
+            // https://macaddress.io/faq/how-to-detect-a-virtual-machine-by-its-mac-address
+            return IsHyperVAddress(physicalAddress)
+                || IsVirtualBoxAddress(physicalAddress)
+                || IsVMWareAddress(physicalAddress)
+                || IsXenAddress(physicalAddress)
+                || IsParallellsAddress(physicalAddress)
+                || IsVirtualIron(physicalAddress);
+        }
+        bool IsHyperVAddress(byte[] physicalAddress)
+        {
+            // 00-15-5D(Hyper-V), 00-03-FF(Virtual PC)
+            return physicalAddress.Length >= 3
+                && (physicalAddress[0] == 0x00
+                && physicalAddress[1] == 0x15
+                && physicalAddress[2] == 0x5d
+                || physicalAddress[0] == 0x00
+                && physicalAddress[1] == 0x03
+                && physicalAddress[2] == 0xff);
+        }
+
+        bool IsVirtualBoxAddress(byte[] physicalAddress)
+        {
+            // 08-00-27(Oracle VirtualBox 5.2), 00:21:F6(Oracle VirtualBox 3.3), 00:14:4F(Oracle VM Server for SPARC)
+            // 52:54:00:C9:C7:04(Oracle VirtualBox 5.2 + Vagrant)
+            return (physicalAddress.Length >= 3
+                && (physicalAddress[0] == 0x08
+                && physicalAddress[1] == 0x00
+                && physicalAddress[2] == 0x27
+                || physicalAddress[0] == 0x00
+                && physicalAddress[1] == 0x21
+                && physicalAddress[2] == 0xf6
+                || physicalAddress[0] == 0x00
+                && physicalAddress[1] == 0x14
+                && physicalAddress[2] == 0x4f))
+                || physicalAddress.Length >= 6
+                && (physicalAddress[0] == 0x52
+                && physicalAddress[1] == 0x54
+                && physicalAddress[2] == 0x00
+                && physicalAddress[3] == 0xc9
+                && physicalAddress[4] == 0xc7
+                && physicalAddress[5] == 0x04);
+        }
+
+        bool IsVMWareAddress(byte[] physicalAddress)
+        {
+            // 00-50-56, 00-0C-29, 00-05-69, 00:1C:14
+            return physicalAddress.Length >= 3
+                && (physicalAddress[0] == 0x00
+                && physicalAddress[1] == 0x50
+                && physicalAddress[2] == 0x56
+                || physicalAddress[0] == 0x00
+                && physicalAddress[1] == 0x0c
+                && physicalAddress[2] == 0x29
+                || physicalAddress[0] == 0x00
+                && physicalAddress[1] == 0x05
+                && physicalAddress[2] == 0x69
+                || physicalAddress[0] == 0x00
+                && physicalAddress[1] == 0x1c
+                && physicalAddress[2] == 0x14);
+        }
+
+        bool IsXenAddress(byte[] physicalAddress)
+        {
+            // 00-16-3E
+            return physicalAddress.Length >= 3
+                && (physicalAddress[0] == 0x00
+                && physicalAddress[1] == 0x16
+                && physicalAddress[2] == 0x3e);
+        }
+
+        bool IsParallellsAddress(byte[] physicalAddress)
+        {
+            // 00-1C-42
+            return physicalAddress.Length >= 3
+                && (physicalAddress[0] == 0x00
+                && physicalAddress[1] == 0x1c
+                && physicalAddress[2] == 0x42);
+        }
+
+        bool IsVirtualIron(byte[] physicalAddress)
+        {
+            // 00-0F-4B (Oracle Virtual Iron 4)
+            return physicalAddress.Length >= 3
+                && physicalAddress[0] == 0x00
+                && physicalAddress[1] == 0x0f
+                && physicalAddress[2] == 0x4b;
         }
 
         ///// <summary>
