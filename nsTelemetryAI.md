@@ -790,7 +790,9 @@ If disabled, calling the [ITelemetry](#T-NishySoftware-Telemetry-ITelemetry 'Nis
 
 ##### Returns
 
-old value
+[en] old value.
+
+[ja]変更前の値。
 
 ##### Parameters
 

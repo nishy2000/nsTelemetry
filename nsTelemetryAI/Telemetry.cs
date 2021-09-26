@@ -58,6 +58,11 @@ namespace NishySoftware.Telemetry.ApplicationInsights
         /// [ja] DeveloperModeを設定・解除する
         /// </summary>
         /// <param name="enable">[en] new value. <br/> [ja]新しい値。</param>
+        /// <returns>
+        /// [en] old value.
+        /// <br/>
+        /// [ja]変更前の値。
+        /// </returns>
         /// <remarks>
         /// [en] This library is automatically set to DeveloperMode mode when the Debugger is attached.
         /// When DeveloperMode is enabled, synchronous transmission is always performed when the <see cref="T:NishySoftware.Telemetry.ITelemetry"/>.TrackXXXX() function is called.
@@ -69,7 +74,6 @@ namespace NishySoftware.Telemetry.ApplicationInsights
         /// 同期送信では、<see cref="T:NishySoftware.Telemetry.ITelemetry"/>.TrackXXXX()関数を呼び出したときに送信完了するまでの待ちが発生するため、アプリの動作が遅くなります。
         /// デバッグ時にアプリの動作が遅くならないようにするためには、DeveloperModeを解除します。
         /// </remarks>
-        /// <returns>old value</returns>
         public static bool? EnableDeveloperMode(bool enable)
         {
             return TelemetryFactoryApplicationInsights.EnableDeveloperMode(enable);
