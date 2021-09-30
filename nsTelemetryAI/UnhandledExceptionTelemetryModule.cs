@@ -25,6 +25,7 @@ namespace NishySoftware.Telemetry.ApplicationInsights
     {
         private readonly ITelemetryChannel channel;
         private readonly Action<UnhandledExceptionEventHandler> unregisterAction;
+        private TelemetryConfiguration telemetryConfiguration;
 
         ///// <summary>
         ///// Initializes a new instance of the <see cref="UnhandledExceptionTelemetryModule"/> class.
@@ -56,6 +57,7 @@ namespace NishySoftware.Telemetry.ApplicationInsights
         public void Initialize(TelemetryConfiguration configuration)
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
         {
+            this.telemetryConfiguration = configuration;
         }
 
         ///// <summary>
@@ -105,7 +107,7 @@ namespace NishySoftware.Telemetry.ApplicationInsights
             //WindowsServerEventSource.Log.CurrentDomainOnUnhandledException();
 
 #if true
-            var telemetryClient = this.GetTelemetryClient(TelemetryFactoryApplicationInsights._globalParams._config);
+            var telemetryClient = this.GetTelemetryClient(this.telemetryConfiguration);
 #else
             var telemetryClient = this.GetTelemetryClient(TelemetryConfiguration.Active);
 #endif

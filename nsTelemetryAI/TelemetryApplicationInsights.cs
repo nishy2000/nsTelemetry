@@ -81,12 +81,53 @@ namespace NishySoftware.Telemetry.ApplicationInsights
         static TelemetryFactoryApplicationInsights()
         {
 #if true
-            var configXml = ReadConfigurationXml();
-            var config = TelemetryConfiguration.CreateFromConfiguration(configXml);
+            TelemetryConfiguration adjustedConfig = null;
+
+            if (!IsWindowsPlatform)
+            {
+                // https://github.com/microsoft/ApplicationInsights-dotnet/pull/1860 (SDK 2.15 or later)
+                // ServerTelemetryChannel stores telemetry data in default folder during transient errors in non-windows environments] #1860 
+                var tcVersionString = typeof(Microsoft.ApplicationInsights.WindowsServer.TelemetryChannel.ServerTelemetryChannel).Assembly.GetCustomAttributes(false).OfType<AssemblyFileVersionAttribute>().First<AssemblyFileVersionAttribute>().Version;
+                var isVersion = Version.TryParse(tcVersionString, out var tcVersion);
+
+                if (!isVersion || tcVersion < new Version(2, 15))
+                {
+                    // SDK 2.15 or before
+
+                    var configXml = ReadConfigurationXml();
+                    var telemetryFolder = GetTelemetryFolder();
+                    var subdirectoryName = GetStorageFolderName();
+                    var telemetryStorageFolder = Path.Combine(telemetryFolder, "StorageFolder", subdirectoryName);
+                    var adjustedConfigXml = AdjustServerTelemetryChannelStorageFolder(configXml, telemetryStorageFolder, out var adjustedStorageFolder);
+                    if (adjustedStorageFolder)
+                    {
+                        try
+                        {
+                            if (!Directory.Exists(telemetryStorageFolder))
+                            {
+                                System.IO.Directory.CreateDirectory(telemetryStorageFolder);
+                            }
+                            configXml = adjustedConfigXml;
+                            adjustedConfig = TelemetryConfiguration.CreateFromConfiguration(configXml);
+                        }
+                        catch { }
+                    }
+                }
+            }
+
+            // Refer TelemetryConfiguration.Active in order to initialize TelemetryModules in ApplicationInsights.config
+            var config = TelemetryConfiguration.Active;
+
+            // Update telemetryChannel
+            if (adjustedConfig != null)
+            {
+                config.TelemetryChannel = adjustedConfig.TelemetryChannel;
+            }
 #else
             var config = TelemetryConfiguration.Active;
 #endif
             _globalParams._config = config;
+
 #if DEBUG
             var isAttached = true;
 #else
@@ -445,6 +486,139 @@ namespace NishySoftware.Telemetry.ApplicationInsights
             return string.Empty;
         }
 
+        static string AdjustServerTelemetryChannelStorageFolder(string configXml, string storageFolderPath, out bool adjustedStorageFolder)
+        {
+            adjustedStorageFolder = false;
+            if (string.IsNullOrWhiteSpace(configXml)) return string.Empty;
+            if (string.IsNullOrWhiteSpace(storageFolderPath)) return configXml;
+
+            // Remove <!-- --!>
+            var commentStartKey = "<!--";
+            var commentEndKey = "-->";
+            int commentStart;
+            while ((commentStart = configXml.IndexOf(commentStartKey)) >= 0)
+            {
+                var commentEnd = configXml.IndexOf(commentEndKey, commentStart + commentStartKey.Length);
+                if (commentEnd >= 0)
+                {
+                    configXml = configXml.Remove(commentStart, commentEnd + commentEndKey.Length - commentStart);
+                }
+            }
+
+            // find TelemetryChannel elements
+            var tcStartKey = "<TelemetryChannel";
+            var typeKey = "Type";
+            var typeClassName = "Microsoft.ApplicationInsights.WindowsServer.TelemetryChannel.ServerTelemetryChannel";
+            var tcEndBracketKey = ">";
+            var tcsfStartKey = "<StorageFolder>";
+            var tcEndKey = "</TelemetryChannel>";
+            int startIndex = 0;
+            int tcStartTag;
+            bool done = false;
+            while (!done && (tcStartTag = configXml.IndexOf(tcStartKey, startIndex)) >= 0)
+            {
+                startIndex = tcStartTag + tcStartKey.Length + 1;
+
+                // check TelemetryChannel as a word
+                var tcStartValue = configXml.Substring(tcStartTag, tcStartKey.Length + 1);
+                if (tcStartValue.Trim() != tcStartKey)
+                {
+                    continue;
+                }
+
+                // check end bracket
+                var tcEndBracket = configXml.IndexOf(tcEndBracketKey, startIndex);
+                if (tcStartTag < 0 || tcEndBracket < 0)
+                {
+                    break;
+                }
+                else
+                {
+                    var matchType = false;
+
+                    // check type attribute
+                    var tcTypeAttr = configXml.IndexOf(typeKey, startIndex);
+                    if (tcTypeAttr > 0 && tcTypeAttr < tcEndBracket)
+                    {
+                        var value = configXml.Substring(tcTypeAttr + typeKey.Length, tcEndBracket - tcTypeAttr - typeKey.Length);
+                        value = value.Trim();
+                        if (value.Length > 0 && value[0] == '=')
+                        {
+                            value = value.Substring(1);
+                            value = value.Trim();
+                            if (value.Length > 0 && (value[0] == '"' || value[0] == '\''))
+                            {
+                                var quote = value[0];
+                                value = value.Substring(1);
+                                var quoteEnd = value.IndexOf(quote);
+                                if (quoteEnd >= 0)
+                                {
+                                    value = value.Substring(0, quoteEnd);
+                                }
+
+                            }
+
+                            // check class name
+                            var typeValues = value.Split(new char[] { ',' }, 2);
+                            matchType = typeValues.First().Trim() == typeClassName;
+                        }
+                    }
+                    if (matchType)
+                    {
+                        startIndex = tcEndBracket + tcEndBracketKey.Length;
+                        var escapedStorageFolderPath = storageFolderPath.Replace("&", "&amp;");
+                        if (configXml[tcEndBracket - 1] == '/')
+                        {
+                            // <TelemetryChannel ... />
+                            var element = string.Format("><StorageFolder>{0}</StorageFolder></TelemetryChannel>", escapedStorageFolderPath);
+                            configXml = configXml.Remove(tcEndBracket - 1, 2);
+                            configXml = configXml.Insert(tcEndBracket - 1, element);
+                            startIndex += element.Length - 2;
+
+                            adjustedStorageFolder = true;
+
+                            // Set StorageFolder only once.
+                            done = true;
+                        }
+                        else
+                        {
+                            // <TelemetryChannel ... >...</TelemetryChannel>
+                            var tcEndTag = configXml.IndexOf(tcEndKey, startIndex);
+
+                            if (tcEndTag < 0)
+                            {
+                                continue;
+                            }
+                            if (configXml.IndexOf(tcsfStartKey, startIndex) >= 0)
+                            {
+                                // already exist StorageFolder tag in TelemetryChannel tag
+                                startIndex = tcEndTag + tcEndKey.Length;
+
+                                done = true;
+                            }
+                            else
+                            {
+                                // not exist StorageFolder tag in TelemetryChannel tag
+                                var element = string.Format("<StorageFolder>{0}</StorageFolder>", escapedStorageFolderPath);
+                                configXml = configXml.Insert(tcEndBracket + 1, element);
+                                startIndex = tcEndTag + tcEndKey.Length + element.Length;
+
+                                adjustedStorageFolder = true;
+
+                                // Set StorageFolder only once.
+                                done = true;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        startIndex = tcEndBracket + tcEndBracketKey.Length;
+                    }
+                }
+            }
+            return configXml;
+        }
+
         #endregion private methods
     }
 
@@ -796,8 +970,8 @@ namespace NishySoftware.Telemetry.ApplicationInsights
             }
         }
 
-        static string _folderCompany = "nishy software";
-        static string _folderProduct = "nsTelemetry";
+        static readonly string _folderCompany = "nishy software";
+        static readonly string _folderProduct = "nsTelemetry";
 
         static internal string GetTelemetryFolder()
         {
@@ -830,6 +1004,56 @@ namespace NishySoftware.Telemetry.ApplicationInsights
             }
 
             return appFolder;
+        }
+
+        static internal string GetStorageFolderName()
+        {
+#if NETFRAMEWORK
+            var baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+#else
+            var baseDirectory = AppContext.BaseDirectory;
+#endif
+
+            var appIdentity = GetName() + "@" + Path.Combine(baseDirectory, System.Diagnostics.Process.GetCurrentProcess().ProcessName);
+            return GetSHA256Hash(appIdentity);
+        }
+
+        static internal string GetSHA256Hash(string input)
+        {
+            var hashString = new StringBuilder();
+
+            byte[] inputBits = Encoding.Unicode.GetBytes(input);
+            using (var sha256 = CreateSHA256())
+            {
+                byte[] hashBits = sha256.ComputeHash(inputBits);
+                foreach (byte b in hashBits)
+                {
+                    hashString.Append(b.ToString("x2", CultureInfo.InvariantCulture));
+                }
+            }
+
+            return hashString.ToString();
+        }
+
+        static SHA256 CreateSHA256()
+        {
+#if NETSTANDARD
+            return SHA256.Create();
+#else
+            return new SHA256CryptoServiceProvider();
+#endif
+        }
+
+        static string GetName()
+        {
+            if (IsWindowsPlatform)
+            {
+                return WindowsIdentity.GetCurrent().Name;
+            }
+            else
+            {
+                return Environment.UserName;
+            }
         }
     }
 
@@ -1072,7 +1296,7 @@ namespace NishySoftware.Telemetry.ApplicationInsights
                 return this._userId;
             }
 
-            string userId = null;
+            string userId;
             if (IsWindowsPlatform)
             {
                 userId = GetUserSid();
@@ -1892,7 +2116,6 @@ namespace NishySoftware.Telemetry.ApplicationInsights
             var searcher = new System.Management.ManagementObjectSearcher(scope, q);
             var collection = searcher.Get();
 
-            var sb = new System.Text.StringBuilder();
             foreach (var o in collection)
             {
                 if (props == null && o.Properties.Count > 0)
