@@ -5,9 +5,9 @@
     <TargetFrameworks>net452;netstandard2.0</TargetFrameworks>
     <AssemblyName>nsTelemetryAI</AssemblyName>
     <AssemblyTitle>Telemetry library for ApplicationInsights</AssemblyTitle>
-    <AssemblyVersion>2.1.1.9300</AssemblyVersion>
-    <FileVersion>2.1.1.9300</FileVersion>
-    <Version>2.1.1-alpha01</Version>
+    <AssemblyVersion>2.1.1.10160</AssemblyVersion>
+    <FileVersion>2.1.1.10160</FileVersion>
+    <Version>2.1.1</Version>
     <RootNamespace>NishySoftware.Telemetry.ApplicationInsights</RootNamespace>
     <Company>nishy software</Company>
     <Authors>nishy software</Authors>
@@ -18,11 +18,11 @@
     <PackageProjectUrl>https://github.com/nishy2000/nsTelemetry</PackageProjectUrl>
     <RepositoryUrl>https://github.com/nishy2000/nsTelemetry</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageTags>Desktop App ApplicationInsisghts nsTelemetryAI</PackageTags>
+    <PackageTags>Desktop App ApplicationInsights telemtry nsTelemetryAI</PackageTags>
     <Description>Provides the ability to collect telemetry with ApplicationInsights for PC app</Description>
     <PackageReleaseNotes>
       Changes from 2.1.0 to 2.1.1
-      - Improve implementation for Linux
+      - Improve implementation for Linux (including WSL1 / WSL2)
       Changes to 2.1.0
       - Initial public version
     </PackageReleaseNotes>
@@ -40,7 +40,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.ApplicationInsights" Version="2.14.0" />
     <PackageReference Include="Microsoft.ApplicationInsights.WindowsServer.TelemetryChannel" Version="2.14.0" />
     <PackageReference Include="Vsxmd" Version="1.4.5">
       <PrivateAssets>all</PrivateAssets>

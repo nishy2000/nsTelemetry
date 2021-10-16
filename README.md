@@ -187,6 +187,20 @@ namespace : NishySoftware.Telemetry
 namespace : NishySoftware.Telemetry.ApplicationInsights
 - [Telemetry](nsTelemetryAI.md#T-NishySoftware-Telemetry-ApplicationInsights-Telemetry) class
 
+## Configuration file (ApplicationInsights.config)
+nsTelemetry uses ApplicationInsights.config file as a configuration file.
+The specification of the ApplicationInsights.config file is slightly extended from [the original specification](https://docs.microsoft.com/en-us/azure/azure-monitor/app/configuration-with-applicationinsights-config) of the ApplicationInsights.config file.
+
+- InstrumentationDevKey tag
+
+  This tag is intended to be used during development. The value of this tag will be used in place of the value of the InstrumentationKey tag when in developer mode or when the debugger is attached.
+
+- StorageFolder property of ServerTelemetryChannel on a non-Windows environment,
+
+When using ServerTelemetryChannel in a non-Windows environment, [the StorageFolder property](https://docs.microsoft.com/en-us/azure/azure-monitor/app/telemetry-channels#configurable-settings-in-channels) must be explicitly specified in the ApplicationInsights.config file.
+When using this library, the StorageFolder property no longer needs to be explicitly specified.
+If the StorageFolder property is not specified, it will be set to the appropriate value in this library.
+
 ## License
 
 This library is under [the MIT License (MIT)](LICENSE).
