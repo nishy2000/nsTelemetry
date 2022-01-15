@@ -28,6 +28,10 @@ The PC apps are intended for Windows and Linux.
 ![Telemetry Graph example](images/nsTelemetry-AppInsight-sample-en.png "Example graph of the app usage timeline in Azure Application Insights")
 *Example graph of the app usage timeline in Azure Application Insights*
 
+## License
+
+This library is under [the Apache-2.0 License](LICENSE).
+
 ## Installation
 
 Install NuGet package(s).
@@ -200,7 +204,3 @@ The specification of the ApplicationInsights.config file is slightly extended fr
 When using ServerTelemetryChannel in a non-Windows environment, [the StorageFolder property](https://docs.microsoft.com/en-us/azure/azure-monitor/app/telemetry-channels#configurable-settings-in-channels) must be explicitly specified in the ApplicationInsights.config file.
 When using this library, the StorageFolder property no longer needs to be explicitly specified.
 If the StorageFolder property is not specified, it will be set to the appropriate value in this library.
-
-## License
-
-This library is under [the MIT License (MIT)](LICENSE).
