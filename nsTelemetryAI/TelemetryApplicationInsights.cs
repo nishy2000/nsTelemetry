@@ -767,7 +767,7 @@ namespace NishySoftware.Telemetry.ApplicationInsights
             this.TrackPageView(telemetry, properties, metrics);
         }
 
-        public void TrackException(Exception exception, Microsoft.ApplicationInsights.DataContracts.SeverityLevel level, string prop1key, string prop1value, string prop2key = null, string prop2value = null, string prop3key = null, string prop3value = null)
+        public void TrackException(Exception exception, NishySoftware.Telemetry.SeverityLevel level, string prop1key, string prop1value, string prop2key = null, string prop2value = null, string prop3key = null, string prop3value = null)
         {
             var properties = new Dictionary<string, string>();
             if (!string.IsNullOrEmpty(prop1key))
@@ -785,11 +785,33 @@ namespace NishySoftware.Telemetry.ApplicationInsights
             this.TrackException(exception, level, properties);
         }
 
-        public void TrackException(Exception exception, Microsoft.ApplicationInsights.DataContracts.SeverityLevel level, IDictionary<string, string> properties = null, IDictionary<string, double> metrics = null)
+        public void TrackException(Exception exception, NishySoftware.Telemetry.SeverityLevel level, IDictionary<string, string> properties = null, IDictionary<string, double> metrics = null)
         {
+            var levelAI = Microsoft.ApplicationInsights.DataContracts.SeverityLevel.Error;
+            switch (level)
+            {
+                case NishySoftware.Telemetry.SeverityLevel.Verbose:
+                    levelAI = SeverityLevel.Verbose;
+                    break;
+                case NishySoftware.Telemetry.SeverityLevel.Information:
+                    levelAI = SeverityLevel.Information;
+                    break;
+                case NishySoftware.Telemetry.SeverityLevel.Warning:
+                    levelAI = SeverityLevel.Warning;
+                    break;
+                case NishySoftware.Telemetry.SeverityLevel.Error:
+                    levelAI = SeverityLevel.Error;
+                    break;
+                case NishySoftware.Telemetry.SeverityLevel.Critical:
+                    levelAI = SeverityLevel.Critical;
+                    break;
+                default:
+                    System.Diagnostics.Debug.Assert(false, nameof(NishySoftware.Telemetry.SeverityLevel));
+                    break;
+            }
             var exp = new ExceptionTelemetry(exception)
             {
-                SeverityLevel = level,
+                SeverityLevel = levelAI,
             };
 
             this.TrackException(exp, ExceptionHandledAt.UserCode, properties, metrics);

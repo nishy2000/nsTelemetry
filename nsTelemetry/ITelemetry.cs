@@ -135,6 +135,45 @@ namespace NishySoftware.Telemetry
     };
 
     /// <summary>
+    /// [en] Enumeration values used by ExceptionTelemetry (TrackException) and TraceTelemetry to identify severity levels
+    /// <br/>
+    /// [ja] ExceptionTelemetry (TrackException) および TraceTelemetry が重大度レベルを識別するために使用する列挙値
+    /// </summary>
+    public enum SeverityLevel
+    {
+        /// <summary>
+        /// [en] Verbose severity level
+        /// <br/>
+        /// [ja] 冗長の重要度
+        /// </summary>
+        Verbose = 0,
+        /// <summary>
+        /// [en] Information severity level
+        /// <br/>
+        /// [ja] 情報の重要度
+        /// </summary>
+        Information = 1,
+        /// <summary>
+        /// [en] Warning severity level
+        /// <br/>
+        /// [ja] 警告の重要度
+        /// </summary>
+        Warning = 2,
+        /// <summary>
+        /// [en] Error severity level
+        /// <br/>
+        /// [ja] エラーの重要度
+        /// </summary>
+        Error = 3,
+        /// <summary>
+        /// [en] Critical severity level
+        /// <br/>
+        /// [ja] 致命的な重要度
+        /// </summary>
+        Critical = 4
+    }
+
+    /// <summary>
     /// [en] Interface for Telemetry
     /// <br/>
     /// [ja] Telemetry用のインターフェース
@@ -436,7 +475,7 @@ namespace NishySoftware.Telemetry
         /// <param name="prop2value">[en] String property value #2. <br/> [ja] 文字列プロパティ値2。</param>
         /// <param name="prop3key">[en] Key name of string property value #3. <br/> [ja] 文字列プロパティ値3のキー名。</param>
         /// <param name="prop3value">[en] String property value #3. <br/> [ja] 文字列プロパティ値3。</param>
-        void TrackException(Exception exception, Microsoft.ApplicationInsights.DataContracts.SeverityLevel level, string prop1key, string prop1value, string prop2key = null, string prop2value = null, string prop3key = null, string prop3value = null);
+        void TrackException(Exception exception, SeverityLevel level, string prop1key, string prop1value, string prop2key = null, string prop2value = null, string prop3key = null, string prop3value = null);
 
         /// <summary>
         /// [en] Send information about the exception event in the application.
@@ -449,7 +488,7 @@ namespace NishySoftware.Telemetry
         /// <param name="level">[en] Severity level. <br/> [ja] 深刻度</param>
         /// <param name="properties">[en] Named string values you can use to search and classify events. <br/> [ja] イベントの検索や分類に使用できる名前付きの文字列値。</param>
         /// <param name="metrics">[en] Named measurements associated with this event. <br/> [ja] このイベントに関連する名前付きの測定値。</param>
-        void TrackException(Exception exception, Microsoft.ApplicationInsights.DataContracts.SeverityLevel level, IDictionary<string, string> properties = null, IDictionary<string, double> metrics = null);
+        void TrackException(Exception exception, SeverityLevel level, IDictionary<string, string> properties = null, IDictionary<string, double> metrics = null);
 
         /// <summary>
         /// [en] Flushes the unsent telemetry data in the in-memory buffer.
@@ -623,7 +662,7 @@ namespace NishySoftware.Telemetry
         }
 
         /// <inheritdoc/>
-        public void TrackException(Exception exception, Microsoft.ApplicationInsights.DataContracts.SeverityLevel level, string prop1key, string prop1value, string prop2key = null, string prop2value = null, string prop3key = null, string prop3value = null)
+        public void TrackException(Exception exception, SeverityLevel level, string prop1key, string prop1value, string prop2key = null, string prop2value = null, string prop3key = null, string prop3value = null)
         {
             Contract.Requires(exception != null);
             Contract.Requires(prop1key == null || prop1key != "");
@@ -635,7 +674,7 @@ namespace NishySoftware.Telemetry
         }
 
         /// <inheritdoc/>
-        public void TrackException(Exception exception, Microsoft.ApplicationInsights.DataContracts.SeverityLevel level, IDictionary<string, string> properties = null, IDictionary<string, double> metrics = null)
+        public void TrackException(Exception exception, SeverityLevel level, IDictionary<string, string> properties = null, IDictionary<string, double> metrics = null)
         {
             Contract.Requires(exception != null);
         }

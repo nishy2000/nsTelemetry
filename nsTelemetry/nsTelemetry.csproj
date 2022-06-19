@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+	<TargetFrameworks>net452;netstandard2.0</TargetFrameworks>
+	<AssemblyName>nsTelemetry</AssemblyName>
+    <AssemblyTitle>Telemetry core library</AssemblyTitle>
+    <AssemblyVersion>2.2.0.6190</AssemblyVersion>
+    <FileVersion>2.2.0.6190</FileVersion>
+    <Version>2.2</Version>
+    <RootNamespace>NishySoftware.Telemetry</RootNamespace>
+    <Company>nishy software</Company>
+    <Authors>nishy software</Authors>
+    <Copyright>©2015, 2017, 2018, 2020, 2021, 2022 nishy software</Copyright>
+    <PackageId>NishySoftware.Telemetry</PackageId>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageProjectUrl>https://github.com/nishy2000/nsTelemetry</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/nishy2000/nsTelemetry</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>Desktop App ApplicationInsights application-insights telemtry nsTelemetry nsTelemetryAI</PackageTags>
+    <Description>Provides the ability to collect telemetry with ApplicationInsights for PC app</Description>
+    <PackageReleaseNotes>
+      Changes to 2.2.0
+      - Initial public version
+      - Common interface definition separated from nsTelemetryAI
+    </PackageReleaseNotes>
+
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+ 
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <DocumentationFile>nsTelemetry.xml</DocumentationFile>
+    <DocumentationMarkdown>$(MSBuildProjectDirectory)\..\nsTelemetry.md</DocumentationMarkdown>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Vsxmd" Version="1.4.5">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+</Project>

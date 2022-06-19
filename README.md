@@ -40,7 +40,8 @@ Install NuGet package(s).
 PM> Install-Package NishySoftware.Telemetry.ApplicationInsights
 ```
 
-* [NishySoftware.Telemetry.ApplicationInsights](https://www.nuget.org/packages/NishySoftware.Telemetry.ApplicationInsights/) - nsTelemetry library.
+* [NishySoftware.Telemetry](https://www.nuget.org/packages/NishySoftware.Telemetry/) - nsTelemetry core library.
+* [NishySoftware.Telemetry.ApplicationInsights](https://www.nuget.org/packages/NishySoftware.Telemetry.ApplicationInsights/) - nsTelemetry ApplicationInsights library.
 
 ## How to use
 
@@ -179,14 +180,14 @@ namespace nsTelemetryAI.Sample
 
 ## nsTelemetry API Reference
 
-The API reference for nsTelemetryAI can be found in the [nsTelemetryAI.md](nsTelemetryAI.md) file.
-This nsTelemetryAI.md is written in both English [en] and Japanese [ja].
+The API reference for nsTelemetryAI can be found in the [nsTelemetry.md](nsTelemetry.md) file and the [nsTelemetryAI.md](nsTelemetryAI.md) file.
+This nsTelemetry.md and nsTelemetryAI.md are written in both English [en] and Japanese [ja].
 
 namespace : NishySoftware.Telemetry
 
-- [ITelemetry](nsTelemetryAI.md#T-NishySoftware-Telemetry-ITelemetry) inteface
-- [TelemetryDataKinds](nsTelemetryAI.md#T-NishySoftware-Telemetry-TelemetryDataKinds) enum
-- [TriggerType](nsTelemetryAI.md#T-NishySoftware-Telemetry-TriggerType) enum
+- [ITelemetry](nsTelemetry.md#T-NishySoftware-Telemetry-ITelemetry) inteface
+- [TelemetryDataKinds](nsTelemetry.md#T-NishySoftware-Telemetry-TelemetryDataKinds) enum
+- [TriggerType](nsTelemetry.md#T-NishySoftware-Telemetry-TriggerType) enum
 
 namespace : NishySoftware.Telemetry.ApplicationInsights
 - [Telemetry](nsTelemetryAI.md#T-NishySoftware-Telemetry-ApplicationInsights-Telemetry) class
