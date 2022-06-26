@@ -111,17 +111,19 @@ namespace NishySoftware.Telemetry.ApplicationInsights
             catch { }
             try
             {
-                var currentProcess = System.Diagnostics.Process.GetCurrentProcess();
-                exp.Metrics["HandleCount"] = currentProcess.HandleCount;
-                exp.Metrics["ElapaseTime"] = (DateTime.Now - currentProcess.StartTime).TotalSeconds;
-                exp.Metrics["ProcessTime"] = currentProcess.TotalProcessorTime.TotalSeconds;
-                exp.Metrics["UserTime"] = currentProcess.UserProcessorTime.TotalSeconds;
-                exp.Metrics["MemoryPrivateSize"] = currentProcess.PrivateMemorySize64;
-                exp.Metrics["MemoryWorkingSet"] = currentProcess.WorkingSet64;
-                exp.Metrics["MemoryVirtualSize"] = currentProcess.VirtualMemorySize64;
-                exp.Metrics["MemoryPeakWorkingSet"] = currentProcess.PeakWorkingSet64;
-                exp.Metrics["MemoryPeakVirtualSize"] = currentProcess.PeakVirtualMemorySize64;
-                exp.Metrics["ThreadCount"] = currentProcess.Threads.Count;
+                using (var currentProcess = System.Diagnostics.Process.GetCurrentProcess())
+                {
+                    exp.Metrics["HandleCount"] = currentProcess.HandleCount;
+                    exp.Metrics["ElapaseTime"] = (DateTime.Now - currentProcess.StartTime).TotalSeconds;
+                    exp.Metrics["ProcessTime"] = currentProcess.TotalProcessorTime.TotalSeconds;
+                    exp.Metrics["UserTime"] = currentProcess.UserProcessorTime.TotalSeconds;
+                    exp.Metrics["MemoryPrivateSize"] = currentProcess.PrivateMemorySize64;
+                    exp.Metrics["MemoryWorkingSet"] = currentProcess.WorkingSet64;
+                    exp.Metrics["MemoryVirtualSize"] = currentProcess.VirtualMemorySize64;
+                    exp.Metrics["MemoryPeakWorkingSet"] = currentProcess.PeakWorkingSet64;
+                    exp.Metrics["MemoryPeakVirtualSize"] = currentProcess.PeakVirtualMemorySize64;
+                    exp.Metrics["ThreadCount"] = currentProcess.Threads.Count;
+                }
             }
             catch { }
             try

@@ -908,17 +908,19 @@ namespace NishySoftware.Telemetry.ApplicationInsights
                 catch { }
                 try
                 {
-                    var currentProcess = System.Diagnostics.Process.GetCurrentProcess();
-                    telemetry.Metrics["HandleCount"] = currentProcess.HandleCount;
-                    telemetry.Metrics["ElapaseTime"] = (DateTime.Now - currentProcess.StartTime).TotalSeconds;
-                    telemetry.Metrics["ProcessTime"] = currentProcess.TotalProcessorTime.TotalSeconds;
-                    telemetry.Metrics["UserTime"] = currentProcess.UserProcessorTime.TotalSeconds;
-                    telemetry.Metrics["MemoryPrivateSize"] = currentProcess.PrivateMemorySize64;
-                    telemetry.Metrics["MemoryWorkingSet"] = currentProcess.WorkingSet64;
-                    telemetry.Metrics["MemoryVirtualSize"] = currentProcess.VirtualMemorySize64;
-                    telemetry.Metrics["MemoryPeakWorkingSet"] = currentProcess.PeakWorkingSet64;
-                    telemetry.Metrics["MemoryPeakVirtualSize"] = currentProcess.PeakVirtualMemorySize64;
-                    telemetry.Metrics["ThreadCount"] = currentProcess.Threads.Count;
+                    using (var currentProcess = System.Diagnostics.Process.GetCurrentProcess())
+                    {
+                        telemetry.Metrics["HandleCount"] = currentProcess.HandleCount;
+                        telemetry.Metrics["ElapaseTime"] = (DateTime.Now - currentProcess.StartTime).TotalSeconds;
+                        telemetry.Metrics["ProcessTime"] = currentProcess.TotalProcessorTime.TotalSeconds;
+                        telemetry.Metrics["UserTime"] = currentProcess.UserProcessorTime.TotalSeconds;
+                        telemetry.Metrics["MemoryPrivateSize"] = currentProcess.PrivateMemorySize64;
+                        telemetry.Metrics["MemoryWorkingSet"] = currentProcess.WorkingSet64;
+                        telemetry.Metrics["MemoryVirtualSize"] = currentProcess.VirtualMemorySize64;
+                        telemetry.Metrics["MemoryPeakWorkingSet"] = currentProcess.PeakWorkingSet64;
+                        telemetry.Metrics["MemoryPeakVirtualSize"] = currentProcess.PeakVirtualMemorySize64;
+                        telemetry.Metrics["ThreadCount"] = currentProcess.Threads.Count;
+                    }
                 }
                 catch { }
                 try
@@ -1035,9 +1037,11 @@ namespace NishySoftware.Telemetry.ApplicationInsights
 #else
             var baseDirectory = AppContext.BaseDirectory;
 #endif
-
-            var appIdentity = GetName() + "@" + Path.Combine(baseDirectory, System.Diagnostics.Process.GetCurrentProcess().ProcessName);
-            return GetSHA256Hash(appIdentity);
+            using (var process = System.Diagnostics.Process.GetCurrentProcess())
+            {
+                var appIdentity = GetName() + "@" + Path.Combine(baseDirectory, process.ProcessName);
+                return GetSHA256Hash(appIdentity);
+            }
         }
 
         static internal string GetSHA256Hash(string input)
