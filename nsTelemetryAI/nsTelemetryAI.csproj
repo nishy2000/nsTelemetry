@@ -5,13 +5,14 @@
     <TargetFrameworks>net452;netstandard2.0</TargetFrameworks>
     <AssemblyName>nsTelemetryAI</AssemblyName>
     <AssemblyTitle>Telemetry library for ApplicationInsights</AssemblyTitle>
-    <AssemblyVersion>2.2.0.6190</AssemblyVersion>
-    <FileVersion>2.2.0.6190</FileVersion>
-    <Version>2.2</Version>
-    <RootNamespace>NishySoftware.Telemetry.ApplicationInsights</RootNamespace>
+	  <AssemblyVersion>2.2.0.6190</AssemblyVersion>
+	  <FileVersion>2.2.0.6190</FileVersion>
+	  <Version>2.2</Version>
+	  <RootNamespace>NishySoftware.Telemetry.ApplicationInsights</RootNamespace>
     <Company>nishy software</Company>
     <Authors>nishy software</Authors>
-    <Copyright>©2015, 2017, 2018, 2020, 2021, 2022 nishy software</Copyright>
+    <Copyright>©2015, 2017, 2018, 2020, 2021, 2022, 2023 nishy software</Copyright>
+    <Product>nishy software telemetry library</Product>
     <PackageId>NishySoftware.Telemetry.ApplicationInsights</PackageId>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>

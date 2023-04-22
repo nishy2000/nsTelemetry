@@ -11,7 +11,8 @@
     <RootNamespace>NishySoftware.Telemetry</RootNamespace>
     <Company>nishy software</Company>
     <Authors>nishy software</Authors>
-    <Copyright>©2015, 2017, 2018, 2020, 2021, 2022 nishy software</Copyright>
+    <Copyright>©2015, 2017, 2018, 2020, 2021, 2022, 2023 nishy software</Copyright>
+    <Product>nishy software telemetry library</Product>
     <PackageId>NishySoftware.Telemetry</PackageId>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
