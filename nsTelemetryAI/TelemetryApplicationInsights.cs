@@ -1,5 +1,5 @@
 ﻿/* ==============================
-** Copyright 2015, 2018, 2020, 2021, 2022 nishy software
+** Copyright 2015, 2018, 2020, 2021, 2022, 2023 nishy software
 **
 **      First Author : nishy software
 **		Create : 2015/12/07
@@ -324,7 +324,7 @@ namespace NishySoftware.Telemetry.ApplicationInsights
             if (config?.TelemetryChannel != null)
             {
                 old = config.TelemetryChannel.DeveloperMode;
-                config.TelemetryChannel.DeveloperMode = false;
+                config.TelemetryChannel.DeveloperMode = enable;
             }
             return old;
         }
