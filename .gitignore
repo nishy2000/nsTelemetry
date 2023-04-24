@@ -442,4 +442,5 @@ $RECYCLE.BIN/
 !.vscode/extensions.json
 
 # nsTelemetryAI custom
+/nsTelemetry/nuget/Package_*
 /nsTelemetryAI/nuget/Package_*
