@@ -4,10 +4,10 @@
     <OutputType>Library</OutputType>
     <TargetFrameworks>net452;netstandard2.0</TargetFrameworks>
     <AssemblyName>nsTelemetryAI</AssemblyName>
-    <AssemblyTitle>Telemetry library for ApplicationInsights</AssemblyTitle>
-    <AssemblyVersion>2.2.1.4220</AssemblyVersion>
-    <FileVersion>2.2.1.4220</FileVersion>
-    <Version>2.2.1-alpha01</Version>
+    <AssemblyTitle>Telemetry library for ApplicationInsights (nsTelemetryAI)</AssemblyTitle>
+    <AssemblyVersion>2.2.1.4250</AssemblyVersion>
+    <FileVersion>2.2.1.4250</FileVersion>
+    <Version>2.2.1</Version>
     <RootNamespace>NishySoftware.Telemetry.ApplicationInsights</RootNamespace>
     <Company>nishy software</Company>
     <Authors>nishy software</Authors>
@@ -28,6 +28,7 @@
       - Common interface definition separated from nsTelemetryAI to nsTelemetry
       Changes from 2.1.0 to 2.1.1
       - Improve implementation for Linux (including WSL1 / WSL2)
+      - On Linux, set the StorageFolder property automatically if the StorageFolder property does not existed in ApplicationInsight.config.
       Changes to 2.1.0
       - Initial public version
     </PackageReleaseNotes>

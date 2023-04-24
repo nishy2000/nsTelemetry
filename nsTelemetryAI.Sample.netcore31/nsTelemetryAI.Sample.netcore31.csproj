@@ -4,14 +4,15 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <AssemblyName>nsTelemetryAI.Sample</AssemblyName>
-    <AssemblyTitle>nsTelemetryAI.Sample</AssemblyTitle>
-    <AssemblyVersion>2.1.1.10160</AssemblyVersion>
-    <FileVersion>2.1.1.10160</FileVersion>
-    <Version>2.1.1</Version>
+    <AssemblyTitle>Sample application for nsTelemetryAI library (nsTelemetryAI.Sample)</AssemblyTitle>
+    <AssemblyVersion>2.2.1.4250</AssemblyVersion>
+    <FileVersion>2.2.1.4250</FileVersion>
+    <Version>2.2.1</Version>
     <RootNamespace>NishySoftware.Telemetry.ApplicationInsights.Sample</RootNamespace>
     <Company>nishy software</Company>
     <Authors>nishy software</Authors>
-    <Copyright>©2015, 2017, 2018, 2020, 2021 nishy software</Copyright>
+    <Copyright>©2015, 2017, 2018, 2020, 2021, 2023 nishy software</Copyright>
+    <Product>nishy software telemetry library</Product>
   </PropertyGroup>
 
   <ItemGroup>
