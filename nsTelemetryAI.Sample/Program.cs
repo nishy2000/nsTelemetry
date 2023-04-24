@@ -1,6 +1,5 @@
 ﻿/* ==============================
-** Copyright 2020, 2021 nishy software
-**
+** Copyright 2020, 2021, 2023 nishy software
 **      First Author : nishy software
 **		Create : 2020/06/29
 ** ============================== */
@@ -60,10 +59,25 @@ namespace nsTelemetryAI.Sample
                         }
                     }
 
+                    // [en] When the debugger is attached to the process, the default of developer mode is true 
+                    //      Otherwise, the developer mode default is false.
+                    //      When developer mode is true, transmission mode default is synchronous mode.
+                    //      Otherwise, transmission mode default is asynchronous mode.
+                    //      For console apps where the process terminates in a short period of time, asynchronous communication is not enough to send the data by the time the app terminates, so true is recommended.
+                    // [ja] デバッガーがアタッチされているとき、開発者モードの既定値はtrueです。
+                    //      デバッガーがアタッチされていないとき、開発者モードの既定値はfalseです。
+                    //      開発者モードがtrueのとき、送信モードの既定値は同期送信です。
+                    //      開発者モードがfalseのとき、送信モードの既定値は非同期送信です。
+                    //      短時間でプロセスが終了するようなコンソールアプリでは、非同期通信を使うとアプリの終了時までに送信しきれないため、trueを推奨します。
 #if DEBUG
-                    // [en] For the debug version, use synchronous transmission if you need.
-                    // [ja] 必要なら、デバッグ版のときに、非同期送信を利用する
-                    NishySoftware.Telemetry.ApplicationInsights.Telemetry.EnableDeveloperMode(false);
+                    // [en] For the debug version, always use asynchronous transmission if you need.
+                    // [ja] 必要なら、デバッグ版のときに、常に非同期送信を利用する
+                    //NishySoftware.Telemetry.ApplicationInsights.Telemetry.EnableDeveloperMode(false);
+#endif
+#if !DEBUG
+                    // [en] For the release version, always use synchronous transmission if you need.
+                    // [ja] 必要なら、リリース版のときに、常に同期送信を利用する。
+                    NishySoftware.Telemetry.ApplicationInsights.Telemetry.EnableDeveloperMode(true);
 #endif
 
                     return telemetry;
@@ -114,6 +128,10 @@ namespace nsTelemetryAI.Sample
 
             Console.WriteLine("Hello World!");
 
+#if DEBUG
+            Console.WriteLine("Wait for the debugger to give you a chance to attach.\nType a new line to proceed.");
+            var wait2 = Console.ReadLine();
+#endif
             program.TrackEventExit(Environment.ExitCode);
         }
     }

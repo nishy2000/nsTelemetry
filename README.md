@@ -125,9 +125,18 @@ namespace nsTelemetryAI.Sample
                         }
                     }
 
+                    // [en] When the debugger is attached to the process, the default of developer mode is true 
+                    //      Otherwise, the developer mode default is false.
+                    //      When developer mode is true, transmission mode default is synchronous mode.
+                    //      Otherwise, transmission mode default is asynchronous mode.
+                    //      For console apps where the process terminates in a short period of time, asynchronous communication is not enough to send the data by the time the app terminates, so true is recommended.
 #if DEBUG
-                    // [en] For the debug version, use synchronous transmission if you need.
-                    NishySoftware.Telemetry.ApplicationInsights.Telemetry.EnableDeveloperMode(false);
+                    // [en] For the debug version, always use asynchronous transmission if you need.
+                    //NishySoftware.Telemetry.ApplicationInsights.Telemetry.EnableDeveloperMode(false);
+#endif
+#if !DEBUG
+                    // [en] For the release version, always use synchronous transmission if you need.
+                    NishySoftware.Telemetry.ApplicationInsights.Telemetry.EnableDeveloperMode(true);
 #endif
 
                     return telemetry;
