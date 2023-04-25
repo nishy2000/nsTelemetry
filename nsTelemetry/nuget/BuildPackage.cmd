@@ -23,6 +23,7 @@ IF "x-%1"=="x-/?" GOTO HELP
 IF "x-%1"=="x-/h" GOTO HELP
 IF "x-%1"=="x--h" GOTO HELP
 IF "x-%1"=="x--help" GOTO HELP
+IF "x-%1"=="x---help" GOTO HELP
 IF "x-%1" == "x---no-build" SET NO_BUILD=true& SHIFT
 IF "x-%1" == "x--no-build" SET NO_BUILD=true& SHIFT
 IF "x-%1" == "x-/no-build" SET NO_BUILD=true& SHIFT
@@ -268,4 +269,4 @@ IF NOT "x-%EXIT_ERR%" == "x-" (
     ECHO =======================
 )
 
-ENDLOCAL & EXIT /B %EXIT_ERR%
+ENDLOCAL & SET PACKAGE_FOLDERNAME=%WORK_FOLDERNAME%& EXIT /B %EXIT_ERR%
